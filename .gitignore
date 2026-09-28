@@ -57,3 +57,11 @@ secrets.*
 bandit-report.json
 pip-audit-report.*
 *.log
+
+# TLC model-checker trace artifacts
+*_TTrace_*.tla
+*_TTrace_*.bin
+states/
+
+# TLC jar is downloaded on demand by formal/check.sh, never committed
+/tla2tools.jar

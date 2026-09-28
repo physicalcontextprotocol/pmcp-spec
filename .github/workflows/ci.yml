@@ -54,32 +54,52 @@ jobs:
       # `LeaseState` was enforced while proving nothing of the sort.
 
   # ===========================================================================
-  # Formal model checking. Self-hosted, opt-in.
+  # Formal model checking.
   #
-  # TLC needs a JDK, and the full sweep is slow enough to need a real
-  # runner. Set the `self-hosted` label on a machine that has both, or
-  # override `runs-on` for your fork.
+  # This job used to be `runs-on: [self-hosted, tla]` behind
+  # `if: ${{ false }}`, on the stated grounds that "TLC needs a JDK, and
+  # the full sweep is slow enough to need a real runner". Both halves of
+  # that turned out to be wrong: TLC ships as a single Java jar (class
+  # file major 55, so any JDK 11+), and the whole four-model sweep
+  # completes in under two seconds. It ran green on a stock laptop.
   #
-  # This job is deliberately NOT made to pass by skipping. If the runner
-  # pool has no suitable machine, the honest outcome is a red X that says
-  # "the models were not re-checked", not a green tick.
+  # So this now runs on an ordinary GitHub-hosted runner. The jar is
+  # version-pinned and checksum-verified rather than fetched loosely --
+  # a safety gate that depends on an unverified download is not a gate.
+  #
+  # The job is still deliberately NOT made to pass by skipping. If TLC
+  # cannot be obtained, the outcome is a red X saying "the models were
+  # not re-checked", never a green tick.
   # ===========================================================================
   tla:
     name: TLA+ model check (+ mutant self-test)
-    runs-on: [self-hosted, tla]
-    if: ${{ false }}   # enable once a self-hosted TLA+ runner exists
+    runs-on: ubuntu-latest
+    env:
+      # Pinned: tla2tools v1.8.0
+      TLA_VERSION: "1.8.0"
+      TLA_SHA256: "ab4694601923fd5ac06452abbf847c366a5054a3d739552085edd6ed986c29ec"
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check that TLC is present
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Fetch TLC and verify its checksum
         run: |
-          which tlc || { echo "::error::tlc not found on this runner"; exit 1; }
+          set -euo pipefail
+          curl -fsSL --retry 3 --retry-delay 2 \
+            -o tla2tools.jar \
+            "https://github.com/tlaplus/tlaplus/releases/download/v${TLA_VERSION}/tla2tools.jar"
+          echo "${TLA_SHA256}  tla2tools.jar" | sha256sum -c -
+          echo "TLC v${TLA_VERSION} verified"
 
       - name: Check PMCPCore
-        run: tlc2.TLC -config formal/PMCPCore.cfg formal/PMCPCore.tla
+        run: java -cp tla2tools.jar tlc2.TLC -workers auto -config formal/PMCPCore.cfg formal/PMCPCore.tla
 
       - name: Check PMCPRecovery
-        run: tlc2.TLC -config formal/PMCPRecovery.cfg formal/PMCPRecovery.tla
+        run: java -cp tla2tools.jar tlc2.TLC -workers auto -config formal/PMCPRecovery.cfg formal/PMCPRecovery.tla
 
       - name: Self-test — TLC must REJECT the deliberately mutated specs
         run: |
@@ -90,7 +110,8 @@ jobs:
           # The two commands below are EXPECTED TO FAIL. A non-zero exit
           # is the pass condition.
           set +e
-          tlc2.TLC -config formal/self-test/PMCPCore_mutant.cfg \
+          java -cp tla2tools.jar tlc2.TLC -workers auto \
+            -config formal/self-test/PMCPCore_mutant.cfg \
                      formal/self-test/PMCPCore_mutant.tla
           if [ $? -eq 0 ]; then
             echo "::error::TLC accepted a deliberately mutated spec."
@@ -100,7 +121,8 @@ jobs:
           fi
           echo "TLC correctly rejected the mutated PMCPCore model"
 
-          tlc2.TLC -config formal/self-test/PMCPRecovery_mutant.cfg \
+          java -cp tla2tools.jar tlc2.TLC -workers auto \
+            -config formal/self-test/PMCPRecovery_mutant.cfg \
                      formal/self-test/PMCPRecovery_mutant.tla
           if [ $? -eq 0 ]; then
             echo "::error::TLC accepted a deliberately mutated spec."
@@ -123,6 +145,12 @@ jobs:
           echo "| schema | ${{ needs.schema.result }} |" >> "$GITHUB_STEP_SUMMARY"
           echo "| tla    | ${{ needs.tla.result }}    |" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "If \`tla\` shows \`skipped\`, the TLA+ models were **not**" >> "$GITHUB_STEP_SUMMARY"
-          echo "re-checked by this run. The \`Verified today\` section of" >> "$GITHUB_STEP_SUMMARY"
-          echo "\`LIMITATIONS.md\` records the last local model-check, not this one." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ needs.tla.result }}" != "success" ]; then
+            echo "> **The TLA+ models were NOT verified by this run.**" >> "$GITHUB_STEP_SUMMARY"
+            echo "> Treat every formal claim as unverified until \`tla\` is green." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "The \`tla\` job also proves TLC rejects both deliberately" >> "$GITHUB_STEP_SUMMARY"
+            echo "mutated specs, so a green tick means the checker is not" >> "$GITHUB_STEP_SUMMARY"
+            echo "passing vacuously." >> "$GITHUB_STEP_SUMMARY"
+          fi

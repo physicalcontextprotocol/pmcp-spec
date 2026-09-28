@@ -92,9 +92,24 @@ once made an invariant check pass vacuously.
 
 So `formal/self-test/` contains deliberately mutated copies of both
 specs, and the procedure is documented in `formal/README.md` for
-anyone who does not want to take our word for it. The model-checking
-CI job is **currently disabled** pending a self-hosted TLC runner — see
-the job's own comment, and the note in `LIMITATIONS.md`.
+anyone who does not want to take our word for it.
+
+This is checked on every CI run. The `tla` job installs a pinned,
+checksum-verified `tla2tools` and runs all four models — the two real
+specs, which must check clean, and the two mutants, which **must not**.
+
+That job used to be permanently disabled behind `if: ${{ false }}`, on
+the stated grounds that TLC "needs a JDK" and the sweep was "slow
+enough to need a real runner". Neither was true: it is a single jar
+(class file major 55, so any JDK 11+) and the whole sweep finishes in
+under two seconds. It had simply never been run. It runs on an ordinary
+GitHub-hosted runner now.
+
+One caveat, so the green tick is not over-read: the models explore 10
+and 8 distinct states respectively. The mutants being caught is the
+strong signal here — that part proves the checker works. The clean runs
+prove the specs are self-consistent. Neither is a claim about the
+behaviour of real hardware. See `LIMITATIONS.md`.
 
 ## Known open items
 

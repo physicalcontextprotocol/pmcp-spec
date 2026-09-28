@@ -88,12 +88,31 @@ one that can, because it is indistinguishable from a fabricated one.
 
 Stated explicitly so nothing here is over-read:
 
-- **The TLA+ model check was not re-run.** The models and the mutant
-  self-test exist under `formal/`, and the methodology is documented in
-  `formal/README.md`, but the CI job is currently **disabled** pending a
-  self-hosted TLC runner. The most recent model-check is a prior local
-  run, not this one. Treat "both TLA+ specifications re-model-checked"
-  as a historical claim, not one this release re-established.
+- **The TLA+ models check clean, over a very small state space.** This
+  pass *did* re-run the model check — TLC 2026.09.25 (tla2tools 1.8.0) —
+  and it is now re-run on every CI run rather than sitting disabled.
+  But read the numbers before the word "verified":
+
+  | Model | Result | States (distinct) | Depth |
+  |---|---|---|---|
+  | `PMCPCore.tla` | no error found | **10** | 6 |
+  | `PMCPRecovery.tla` | no error found | **8** | — |
+  | `self-test/PMCPCore_mutant.tla` | `SafetyInv` violated | — | — |
+  | `self-test/PMCPRecovery_mutant.tla` | `RecoverySafetyInv` violated | — | — |
+
+  The two mutants being caught is the part that carries weight: it shows
+  TLC is not passing vacuously, which was the live risk given the
+  `pcal.trans` `.cfg`-overwrite failure mode. The clean runs show the
+  models are self-consistent — not that they represent a real robot.
+  Ten distinct states is a small model. It does not explore clock skew,
+  partial actuation, sensor noise, or any of the physical problems listed
+  above. Read "formally checked" as "the spec is not self-contradictory
+  and the checker works", never as "the behaviour of a real system is
+  proved".
+
+  Reproduce with `./formal/check.sh`, which fetches a checksum-verified
+  tla2tools, runs all four models, and exits non-zero if TLC ever
+  accepts a mutant.
 - **`pmcp-typescript` has no test suite and does not compile.** Any
   "three peer SDKs" claim is currently a claim about two SDKs plus a
   skeleton. The TypeScript build being non-blocking in CI is a declared

@@ -1,7 +1,20 @@
 # P-MCP formal specification (TLA+)
 
-Two PlusCal/TLA+ models, both model-checked with TLC (not just written —
-see "self-test" methodology below).
+Two PlusCal/TLA+ models, plus a self-test suite that model-checks them with
+TLC — so that the checker is proven non-vacuous rather than just assumed to
+be (see "self-test" methodology below).
+
+    ./formal/check.sh      # all four models; exit 0 only if all four behave
+
+> **Status: checked on every CI run, and the check is small.** Run
+> `./formal/check.sh` to reproduce it locally. Both models report
+> `No error has been found`, and both mutants are correctly rejected.
+>
+> The number to hold onto is the state count: `PMCPCore` explores **10**
+> distinct states and `PMCPRecovery` **8**. So "verified" here means the
+> specs are not self-contradictory and the checker is not passing
+> vacuously — it does not mean real-robot behaviour is proved. See
+> [`../LIMITATIONS.md`](../LIMITATIONS.md).
 
 ## `PMCPCore.tla` — gate sequence + lease + E-Stop + watchdog
 
