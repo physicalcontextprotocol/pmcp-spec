@@ -195,6 +195,23 @@ solved:
 - Five `pmcp-servers/examples/` files import `pmcp_grand_unified` from
   the private `pmcp-labs` repository, so they cannot run without access
   to it.
+- `pmcp-python` does not type-check. `mypy v05/ pmcp/
+  --ignore-missing-imports` reports **70 errors** across 17 files, and
+  has done so for the life of the CI job. They cluster in
+  `pmcp/physics/engine.py` (17), the deprecated `pmcp/client_v2.py` (13)
+  and `pmcp/physics/hamiltonian/hnn.py` (8), and most are
+  `call-arg` complaints where a call passes keyword arguments the
+  dataclass does not declare — which may be genuine API drift rather than
+  just missing annotations. The CI job is therefore a **regression
+  budget** (fails only above 70), not a type-safety claim, and it is
+  named "mypy error budget (baseline 70)" so a green run is not
+  mistaken for a clean type check. Clearing it is the second
+  highest-value open contribution in `pmcp-python` after picking a
+  canonical client.
+- `pmcp-rust/ledger` does not compile (**19 errors**), and
+  `pmcp-typescript` does not compile (**32**). Both are recorded in their
+  own repos; `pmcp-typescript` guards its 32 with a compile-error budget
+  so the number cannot silently drift again.
 
 ## What this means in practice
 
