@@ -129,7 +129,7 @@ behaviour of real hardware. See `LIMITATIONS.md`.
 
 | Repository | What it is |
 |---|---|
-| [`pmcp-python`](https://github.com/physicalcontextprotocol/pmcp-python) | Python SDK — 187 tests collected, 178 pass / 10 skip by default |
+| [`pmcp-python`](https://github.com/physicalcontextprotocol/pmcp-python) | Python SDK — 214 tests collected, 213 pass / 1 skip by default |
 | [`pmcp-typescript`](https://github.com/physicalcontextprotocol/pmcp-typescript) | TypeScript SDK — skeleton, does not compile yet, no tests |
 | [`pmcp-rust`](https://github.com/physicalcontextprotocol/pmcp-rust) | Rust crates — `pmcp-core` builds with 43 tests; `pmcp-ledger` does not compile |
 | [`pmcp-conformance`](https://github.com/physicalcontextprotocol/pmcp-conformance) | 42 tests any implementation must pass |

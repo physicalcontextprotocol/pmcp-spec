@@ -18,25 +18,49 @@ validator, or a CI job — not by design intent or code review.
 
 | Component | Command | Result |
 |---|---|---|
-| `pmcp-python` | `pytest -q` on `pip install -e ".[dev,numerics]"`, Python 3.12 | **187 collected, 178 passed, 10 skipped** |
-| `pmcp-python` (with `hnn` extra) | `pip install -e ".[dev,numerics,hnn]"` | 10 skips are all `pytest.importorskip("torch")`; they skip rather than silently pass. Full run with torch not recorded here. |
+| `pmcp-python` | `pytest -q` on `pip install -e ".[dev,numerics]"`, Python 3.12 | **214 collected, 213 passed, 1 skipped** |
+| the one skip | `pytest -q -rs` | `tests/v05/test_hnn_gate.py:208` — *"torch/numpy available — cannot test missing-deps path"*. It is an `importorskip`-style guard for the absent-dependency branch, and it can only run when torch/numpy are **not** installed. |
 | `pmcp-rust/pmcp-core` | `cargo test` | **43 passed, 0 failed** |
 | `pmcp-conformance` | `pytest -q` | **42 passed** |
 | `pmcp-spec` schema | `python schema/v0.6.0/verify.py` | **5 fixtures, 0 failures** — 2 valid accepted, 3 invalid rejected *for the stated reason* |
-| `pmcp-typescript` | `npx tsc --noEmit` | **19 compile errors.** No test suite exists. |
-| `pmcp-rust/pmcp-ledger` | `cargo build` | **19 compile errors.** Not runnable. |
+| `pmcp-typescript` | `npx tsc --noEmit` (typescript installed locally) | **32 compile errors** across 7 files. No test suite exists. |
+| `pmcp-rust/pmcp-ledger` | `cargo build` | **19 compile errors** (cargo's own summary: *19 previous errors; 45 warnings*). Not runnable. |
 
-**The 10 Python skips are all Gate-4 HNN tests** behind the optional
-`hnn` extra (torch). They are `importorskip` guards, not silently
-passing tests.
+**A note on how to check the TypeScript number, because it bites.** With
+no local `node_modules`, `npx tsc --noEmit` prints a decoy banner
+("This is not the tsc command you are looking for") and **exits 0**.
+Grepping its output for `error TS` returns zero, which looks exactly
+like a clean build. Install dev dependencies first
+(`npm ci`) or you will "verify" a compile failure into a compile pass.
+`pmcp-typescript`'s CI installs before type-checking, so the job itself
+is sound — but the local one-liner is a trap, and it is how the previous
+"19 errors" figure went stale in the first place.
 
-### A correction
+The single skip is a Gate-4 HNN test guarding the missing-dependency
+branch. It is a guard, not a silently passing test — and it is skipped
+*because* torch/numpy are installed, which is the healthy case.
 
-Earlier drafts of this file, of the organization README, and of
-`pmcp-python/CHANGELOG.md` all claimed **213/213 Python tests passing**.
-That figure did not reproduce on any run. The real number is the table
-above. A test count that cannot be reproduced is worse than a smaller
-one that can, because it is indistinguishable from a fabricated one.
+### A correction — and this one is worth reading
+
+Earlier drafts claimed **213/213 Python tests passing**. During release
+assembly that figure was flagged as unreproducible and rewritten here as
+"187 collected, 178 passed, 10 skipped".
+
+**That rewrite was wrong, and the 213 was right.** Re-running `pytest -q`
+gives 214 collected, 213 passed, 1 skipped — stable across repeated runs.
+The 178/187 figure never corresponded to this tree: 178 passed plus 10
+skipped is 188 outcomes, which cannot come from a 187-test collection, so
+it was arithmetically impossible on its face and should have been
+rejected at the time rather than propagated.
+
+What this illustrates, in the project's own terms: a correction is still
+a claim, and a claim still has to survive a re-run. The error here was
+not dishonesty but the same class of bug this document exists to catch —
+trusting a number because it was written down, in either direction.
+
+`pmcp-python`'s collected total has changed across drafts (187, then
+214), so the count is now stated as collected **and** passed **and**
+skipped, and the command to reproduce it, in every place it appears.
 
 ### Properties, and what backs each
 
