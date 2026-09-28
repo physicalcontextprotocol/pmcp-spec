@@ -7,9 +7,22 @@ specification. The format follows
 Implementation changes belong in the SDK's own changelog
 (`pmcp-python`, `pmcp-typescript`, `pmcp-rust`).
 
-## [1.0.0] — 2026-09-28
+## [0.6.0] — 2026-09-28
 
 First tagged public release of the specification.
+
+Tagged **v0.6.0** to match the JSON Schema it ships, not the wire
+protocol version, and this is worth being precise about because the two
+numbers differ on purpose. The wire protocol is **0.5** — that is what
+`PMCP_VERSION` carries in the reference SDKs and what a client sends in
+`initialize`; `docs/PROTOCOL_SPEC.md` §3.2 explains why the schema runs
+ahead of it. The release tag follows the schema, because the schema is
+the artifact this repository ships and the thing a reader pins.
+
+An earlier draft of this file headed the entry `## [1.0.0]`. That was
+wrong twice over: it claimed a spec release that does not exist, and it
+contradicted this repository's own README badge, which has said
+P-MCP v0.5 throughout. The SDKs are at 1.0.0. The specification is not.
 
 ### Added
 
