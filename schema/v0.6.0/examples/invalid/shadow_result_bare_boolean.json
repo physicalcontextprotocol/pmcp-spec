@@ -1,0 +1,8 @@
+{
+  "$defRef": "ShadowResult",
+  "message": {
+    "verdict": "PASS",
+    "predicted_trajectory": {}
+  },
+  "whyInvalid": "Missing confidence/monitoring/determinism blocks -- sec 10.2 explicitly forbids treating Shadow validation as a bare pass/fail boolean. All five keys are required by the schema; the three blocks are nullable, but their ABSENCE is what this example probes. A real response that cannot report a confidence block must say so with an explicit null, so that a missing subsystem is distinguishable from a verdict nobody checked."
+}

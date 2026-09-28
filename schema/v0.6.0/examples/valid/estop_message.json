@@ -1,0 +1,9 @@
+{
+  "$defRef": "EStopMessage",
+  "message": {
+    "robot_id": "arm-07",
+    "triggered_at": 1755753000.0,
+    "stop_category": 0,
+    "source": "hardware_button"
+  }
+}

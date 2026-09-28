@@ -1,0 +1,11 @@
+{
+  "$defRef": "LeaseGrant",
+  "message": {
+    "lease_id": "l1",
+    "robot_id": "arm-07",
+    "zone_id": "z1",
+    "state": "GRANTED",
+    "fence_token": 42
+  },
+  "whyInvalid": "'GRANTED' is not a valid LeaseState -- the correct value for an approved lease is 'ACTIVE' (sec 6). Note that fence_token IS present here: it must be, or this example would be rejected for a missing required field rather than for the invalid enum value it exists to probe, and the rejection would prove nothing about LeaseState."
+}

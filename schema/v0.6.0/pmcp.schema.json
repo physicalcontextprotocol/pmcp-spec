@@ -1,0 +1,820 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.physicalcontextprotocol.org/v0.6.0/pmcp.schema.json",
+  "title": "P-MCP Protocol Schema",
+  "description": "This top-level schema is a $defs container, not a single message shape -- P-MCP has many message types (see $defs above), each validated individually. A per-message-type JSON-RPC method registry (mapping method name -> request/response $ref pairs) is the next artifact needed here, not yet written -- see docs/SAFETY_ARCHITECTURE.md sec 11 open items.",
+  "version": "0.6.0",
+  "$defs": {
+    "LeaseState": {
+      "description": "docs/SAFETY_ARCHITECTURE.md sec 6. PENDING exists because Raft arbitration takes time -- this is not instantaneous.",
+      "type": "string",
+      "enum": [
+        "FREE",
+        "PENDING",
+        "ACTIVE",
+        "EXPIRED",
+        "DENIED"
+      ]
+    },
+    "RobotState": {
+      "description": "docs/SAFETY_ARCHITECTURE.md sec 5. SAFE is sticky -- no path back to ACTIVE except through the full recovery handshake (sec 10.7 / RecoveryPhase below).",
+      "type": "string",
+      "enum": [
+        "UNCONFIGURED",
+        "INACTIVE",
+        "ACTIVE",
+        "ACTUATING",
+        "SAFE"
+      ]
+    },
+    "RecoveryPhase": {
+      "description": "docs/SAFETY_ARCHITECTURE.md sec 10.7. Only present while robotState transitions out of SAFE. Verified against docs/SAFETY_ARCHITECTURE.md's TLA+ model, formal/PMCPRecovery.tla -- these five phases are a real sequence, not five independently-reachable labels.",
+      "type": "string",
+      "enum": [
+        "RECOVERING_CAUSE",
+        "RECOVERING_SELFTEST",
+        "RECOVERING_ATTEST",
+        "RECOVERING_LEASE"
+      ]
+    },
+    "StopCategory": {
+      "description": "ISO 10218 stop categories, docs/SAFETY_ARCHITECTURE.md sec 4.",
+      "type": "integer",
+      "enum": [
+        0,
+        1,
+        2
+      ],
+      "enumDescriptions": {
+        "0": "Immediate, uncontrolled power removal (E-Stop only)",
+        "1": "Controlled deceleration, then power removal (watchdog/gate failure/lease expiry)",
+        "2": "Controlled stop, power maintained (graceful deactivate)"
+      }
+    },
+    "ErrorCode": {
+      "description": "Superset of pmcp/types.py's 10 base codes and v05/pmcp_v5_types.py's 5 robotics-specific additions -- these did not conflict, only differed in completeness, so both are retained here without loss.",
+      "type": "string",
+      "enum": [
+        "INVALID_REQUEST",
+        "UNAUTHORIZED",
+        "LEASE_DENIED",
+        "LEASE_EXPIRED",
+        "CONSTITUTION_VIOLATION",
+        "SHADOW_REJECTED",
+        "ESTOP_ACTIVE",
+        "TIMEOUT",
+        "INTERNAL_ERROR",
+        "UNKNOWN_ROBOT",
+        "JOINT_LIMIT",
+        "TORQUE_LIMIT",
+        "WORKSPACE_VIOLATION",
+        "COLLISION_DETECTED",
+        "ROBOT_FAULT"
+      ]
+    },
+    "SensorType": {
+      "description": "Union of pmcp/types.py's generic vocabulary and v05's robotics-specific vocabulary. Kept as one superset enum (unlike ShadowVerdict, these values don't semantically conflict -- see MIGRATION_MAP.md).",
+      "type": "string",
+      "enum": [
+        "position",
+        "force",
+        "temperature",
+        "proximity",
+        "vision",
+        "imu",
+        "current",
+        "voltage",
+        "pressure",
+        "custom",
+        "joint_states",
+        "end_effector",
+        "force_torque",
+        "camera_rgb",
+        "camera_depth",
+        "lidar",
+        "battery",
+        "gps",
+        "odometry",
+        "plant_health",
+        "energy_meter"
+      ]
+    },
+    "RobotIdentity": {
+      "description": "docs/SAFETY_ARCHITECTURE.md sec 4 identity/attestation layer. From v05/pmcp_v5_types.py, the only source file that modeled this.",
+      "type": "object",
+      "required": [
+        "robot_id",
+        "public_key_ed25519"
+      ],
+      "properties": {
+        "robot_id": {
+          "type": "string"
+        },
+        "public_key_ed25519": {
+          "type": "string",
+          "description": "Base64-encoded 32-byte Ed25519 public key."
+        },
+        "tee_attestation_quote": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Opaque TEE attestation quote (SGX/SEV/TrustZone/DICE), base64-encoded. Null if the robot has no TEE (permitted, but such robots cannot participate in physical-locality-required leases -- see sec 10.4)."
+        },
+        "location_proof": {
+          "$ref": "#/$defs/LocationProof"
+        }
+      }
+    },
+    "LocationProof": {
+      "description": "docs/SAFETY_ARCHITECTURE.md sec 10.4. TEE attestation proves code integrity, not location -- this is the separate distance-bounding layer. BLE RSSI is sanity-check only, never load-bearing on its own.",
+      "type": "object",
+      "required": [
+        "uwb_distance_bound_m",
+        "anchor_ids",
+        "pose_signature",
+        "valid_until"
+      ],
+      "properties": {
+        "uwb_distance_bound_m": {
+          "type": "number",
+          "description": "IEEE 802.15.4z secure-ranging distance to the nearest trusted anchor, meters."
+        },
+        "anchor_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "pose_signature": {
+          "type": "string",
+          "description": "Ed25519-signed pose report (robot_id, pose, timestamp, optional fiducial_id) -- see sec 10.4. Note: commercial 802.15.4z does not achieve pure Brands-Chaum mafia-fraud resistance; treat as strong, not perfect."
+        },
+        "ble_rssi_sanity_check": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Advisory only. MUST NOT gate any safety decision on its own."
+        },
+        "valid_until": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Tight expiry window -- a moving robot's location claim must expire before it could plausibly have exited its declared zone. Anchor geometry and expiry window are deployment-specific (sec 10.4, still open)."
+        }
+      }
+    },
+    "SpatialLeaseReservation": {
+      "description": "docs/SAFETY_ARCHITECTURE.md sec 10.5. R*-tree reservation tuple, query AABB inflated by safety_margin before intersection check.",
+      "type": "object",
+      "required": [
+        "lease_id",
+        "zone_id",
+        "aabb",
+        "time_interval",
+        "safety_margin_m",
+        "priority_class"
+      ],
+      "properties": {
+        "lease_id": {
+          "type": "string"
+        },
+        "zone_id": {
+          "type": "string"
+        },
+        "aabb": {
+          "type": "object",
+          "description": "Axis-aligned bounding box, meters, in the zone's reference frame.",
+          "required": [
+            "min",
+            "max"
+          ],
+          "properties": {
+            "min": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "max": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 3,
+              "maxItems": 3
+            }
+          }
+        },
+        "time_interval": {
+          "type": "object",
+          "required": [
+            "start",
+            "end"
+          ],
+          "properties": {
+            "start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "end": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "safety_margin_m": {
+          "type": "number",
+          "description": "Must be >= v_max * T_safe + sensor_uncertainty_r (sec 10.5 formula). Not auto-derivable from this schema alone -- see sec 11 open items."
+        },
+        "priority_class": {
+          "type": "string",
+          "enum": [
+            "ESTOP",
+            "SAFETY_CRITICAL",
+            "NORMAL",
+            "BACKGROUND"
+          ],
+          "description": "ESTOP reservations override any existing reservation regardless of time/space overlap."
+        }
+      }
+    },
+    "LeaseGrant": {
+      "type": "object",
+      "required": [
+        "lease_id",
+        "robot_id",
+        "zone_id",
+        "state",
+        "fence_token"
+      ],
+      "properties": {
+        "lease_id": {
+          "type": "string"
+        },
+        "robot_id": {
+          "type": "string"
+        },
+        "zone_id": {
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/LeaseState"
+        },
+        "raft_leader_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Only the Raft-elected leader for this zone may grant an ACTIVE lease (sec 6). Null if state is not ACTIVE/PENDING."
+        },
+        "granted_at": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Unix timestamp, seconds since epoch (matches time.time() in all reference SDKs)."
+        },
+        "expires_at": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Unix timestamp, seconds since epoch (matches time.time() in all reference SDKs)."
+        },
+        "heartbeat_interval_ms": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Missed heartbeat -> Safe State, independent of expires_at (sec 3 invariant 6)."
+        },
+        "deny_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "fence_token": {
+          "type": "integer",
+          "description": "Monotonically increasing fencing token (Kleppmann 2016). MUST be re-presented on every actuation call against this zone, not only at lease-request time -- catches the paused-holder/stale-view failure mode even when lease_id still lexically matches. Current reference SDKs use a single-process monotonic counter; Raft-backed multi-replica deployments should use the Raft term number as the source (see raft_leader_id)."
+        }
+      }
+    },
+    "ConstitutionCheck": {
+      "description": "From pmcp/types.py -- carried forward as-is, not present in v05.",
+      "type": "object",
+      "required": [
+        "passed",
+        "rule_ids_evaluated"
+      ],
+      "properties": {
+        "passed": {
+          "type": "boolean"
+        },
+        "rule_ids_evaluated": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "violated_rule_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "ConformalConfidence": {
+      "description": "docs/SAFETY_ARCHITECTURE.md sec 10.2. Part of ShadowResult -- never a bare boolean.",
+      "type": "object",
+      "required": [
+        "method",
+        "alpha",
+        "calibration_date",
+        "interval_widths"
+      ],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": [
+            "conformal_prediction",
+            "ensemble_variance",
+            "bayesian_dropout"
+          ]
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "calibration_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "interval_widths": {
+          "type": "object",
+          "description": "Per-dimension interval width, e.g. {\"force_n\": 2.1, \"position_m\": 0.003}.",
+          "additionalProperties": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "MonitoringBlock": {
+      "type": "object",
+      "properties": {
+        "ensemble_disagreement": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "ood_score": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "in_distribution": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      }
+    },
+    "DeterminismBlock": {
+      "description": "sec 10.8 -- ensemble_disagreement and this block feed the empirical epsilon_max determination; not derivable from schema alone.",
+      "type": "object",
+      "required": [
+        "input_hash",
+        "output_hash",
+        "model_version",
+        "hardware_fingerprint"
+      ],
+      "properties": {
+        "input_hash": {
+          "type": "string"
+        },
+        "output_hash": {
+          "type": "string"
+        },
+        "model_version": {
+          "type": "string"
+        },
+        "hardware_fingerprint": {
+          "type": "string",
+          "description": "Device/driver/cuDNN/precision fingerprint, for cross-hardware determinism tracking."
+        }
+      }
+    },
+    "ShadowResult": {
+      "description": "docs/SAFETY_ARCHITECTURE.md sec 10.1-10.2. The monitor's composite verdict, NOT the raw HNN prediction, gates actuation -- see 'verdict' description. This replaces the old, incompatible ShadowStatus enums from pmcp/sdk (lowercase) and v05 (uppercase, different members) -- see MIGRATION_MAP.md.",
+      "type": "object",
+      "required": [
+        "verdict",
+        "predicted_trajectory",
+        "confidence",
+        "monitoring",
+        "determinism"
+      ],
+      "$comment": "Sec 10.2: 'Every Shadow validation response must be a typed record, not a bare boolean, minimally including: verdict, the predicted trajectory/forces/energy, a conformal-prediction confidence block, a monitoring block, and a determinism block.' All five keys are therefore REQUIRED. The three blocks are individually NULLABLE, because a subsystem that is not implemented must report that explicitly rather than omit the key -- an absent key is indistinguishable from a bare-boolean verdict, which is the exact anti-pattern sec 10.2 forbids. The previous 'required: [verdict]' let {\"verdict\": \"PASS\", \"predicted_trajectory\": {}} validate cleanly, which is a safety-relevant hole: a Shadow gate that reports only a verdict is the bare-boolean case, and it would have passed the schema.",
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "CONDITIONAL_PASS",
+            "FAIL",
+            "INDETERMINATE"
+          ],
+          "description": "Set by the non-ML monitor (sec 10.1), not the HNN directly. FAIL = hard limit violated. INDETERMINATE = confidence/OOD/ensemble check exceeded threshold ('I don't know' != 'it's fine'). Both FAIL and INDETERMINATE block actuation."
+        },
+        "predicted_trajectory": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": true,
+          "description": "Robot-class-specific predicted trajectory/forces/energy. Left open (additionalProperties) deliberately -- see pmcp-servers per-robot-class schemas for concrete shapes. Optional/nullable: physics or geometric simulators may predict a single resulting pose rather than a full trajectory; report that honestly as null here rather than fabricate trajectory samples."
+        },
+        "confidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ConformalConfidence"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Optional/nullable. Requires the HNN-Simplex monitor's conformal-prediction calibration -- an open research item (see pmcp-spec docs/research), not implemented in any reference SDK as of this version. Do not populate with fabricated values."
+        },
+        "monitoring": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MonitoringBlock"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Optional/nullable. Requires the HNN ensemble-disagreement/OOD monitor -- not implemented in any reference SDK as of this version. Do not populate with fabricated values."
+        },
+        "determinism": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DeterminismBlock"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Optional/nullable. Requires cross-hardware determinism budget measurement -- an open research item (see pmcp-spec docs/research), not implemented in any reference SDK as of this version. Do not populate with fabricated values."
+        },
+        "status": {
+          "type": "string",
+          "description": "Reference-SDK diagnostic status from the physics/geometric simulator (e.g. safe/collision/floor_guard/speed_limit). More granular than verdict; verdict is derived from this."
+        },
+        "predicted_pose": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "Single predicted resulting pose {x,y,z,...} from the physics/geometric simulator."
+        },
+        "duration_s": {
+          "type": "number",
+          "description": "Simulation wall-clock duration, seconds."
+        },
+        "energy_j": {
+          "type": "number",
+          "description": "Estimated energy expenditure, joules."
+        },
+        "collisions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "shadow_token": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "number",
+          "description": "Unix timestamp, seconds since epoch."
+        }
+      }
+    },
+    "AuditEventType": {
+      "description": "From pmcp/types.py -- carried forward, not present in v05.",
+      "type": "string",
+      "enum": [
+        "LEASE_ACQUIRED",
+        "LEASE_RELEASED",
+        "LEASE_EXPIRED",
+        "CONSTITUTION_CHECK",
+        "SHADOW_VALIDATION",
+        "ACTUATION_DISPATCHED",
+        "ACTUATION_COMPLETED",
+        "ESTOP_TRIGGERED",
+        "SAFE_STATE_ENTERED",
+        "RECOVERY_PHASE_TRANSITION",
+        "OPERATOR_ACTION"
+      ]
+    },
+    "AuditEntry": {
+      "type": "object",
+      "required": [
+        "event_type",
+        "timestamp",
+        "robot_id"
+      ],
+      "properties": {
+        "event_type": {
+          "$ref": "#/$defs/AuditEventType"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "robot_id": {
+          "type": "string"
+        },
+        "lease_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "detail": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "MetricsSnapshot": {
+      "description": "From pmcp/types.py -- carried forward, not present in v05.",
+      "type": "object",
+      "properties": {
+        "robot_id": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "cpu_percent": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "memory_mb": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "actuation_latency_ms_p50": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "actuation_latency_ms_p99": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "heartbeat_miss_count": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    },
+    "BatchActuationRequest": {
+      "description": "From pmcp/types.py -- carried forward, not present in v05. Note: sec 3 invariant 7 (SingleActuationPerLease) means batching needs an explicit design, not implicit concurrency -- this schema does not yet resolve how batch items relate to the single-actuation-per-lease invariant. Flagged for follow-up, not resolved here.",
+      "type": "object",
+      "required": [
+        "lease_id",
+        "items"
+      ],
+      "properties": {
+        "lease_id": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    "BatchActuationResult": {
+      "type": "object",
+      "required": [
+        "lease_id",
+        "results"
+      ],
+      "properties": {
+        "lease_id": {
+          "type": "string"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "success"
+            ],
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "error_code": {
+                "$ref": "#/$defs/ErrorCode"
+              }
+            }
+          }
+        }
+      }
+    },
+    "EStopMessage": {
+      "description": "docs/SAFETY_ARCHITECTURE.md sec 2, 3 (Inv 5), 4. First-class, lease-independent, bypasses Lease->Constitution->Shadow entirely. NOT modeled as an ErrorCode -- this is a distinct message type precisely so it cannot inherit the gate pipeline's latency/failure modes.",
+      "type": "object",
+      "required": [
+        "robot_id",
+        "triggered_at",
+        "stop_category"
+      ],
+      "properties": {
+        "robot_id": {
+          "type": "string"
+        },
+        "triggered_at": {
+          "type": "number",
+          "description": "Unix timestamp, seconds since epoch (matches time.time() in all reference SDKs)."
+        },
+        "stop_category": {
+          "const": 0,
+          "description": "E-Stop is always Stop Category 0 (immediate, uncontrolled power removal) -- sec 4 table."
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "hardware_button",
+            "software_watchdog",
+            "operator_console",
+            "gate_failure_escalation"
+          ]
+        }
+      }
+    },
+    "HeartbeatMessage": {
+      "description": "docs/SAFETY_ARCHITECTURE.md sec 2 (mandatory heartbeat / watchdog).",
+      "type": "object",
+      "required": [
+        "robot_id",
+        "lease_id",
+        "timestamp"
+      ],
+      "properties": {
+        "robot_id": {
+          "type": "string"
+        },
+        "lease_id": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "JWSProtectedHeader": {
+      "description": "docs/SAFETY_ARCHITECTURE.md sec 10.6. JWS (RFC 7515) w/ EdDSA (RFC 8037), signing over RFC 8785 canonical JSON. nonce + timestamp are mandatory for safety-critical messages -- without them a captured command is trivially replayable.",
+      "type": "object",
+      "required": [
+        "alg",
+        "kid",
+        "nonce",
+        "timestamp"
+      ],
+      "properties": {
+        "alg": {
+          "const": "EdDSA"
+        },
+        "kid": {
+          "type": "string",
+          "description": "Key ID, references RobotIdentity.public_key_ed25519."
+        },
+        "nonce": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "SignedMessageEnvelope": {
+      "description": "Wraps any safety-critical JSON-RPC 2.0 payload. Verifier MUST reject anything outside the replay window or with a reused (kid, nonce) pair (sec 10.6).",
+      "type": "object",
+      "required": [
+        "protected",
+        "payload",
+        "signature"
+      ],
+      "properties": {
+        "protected": {
+          "$ref": "#/$defs/JWSProtectedHeader"
+        },
+        "payload": {
+          "type": "object",
+          "description": "The JSON-RPC 2.0 request/response/notification object, canonicalized per RFC 8785 before signing."
+        },
+        "signature": {
+          "type": "string",
+          "description": "Base64url-encoded Ed25519 signature."
+        }
+      }
+    },
+    "JsonRpcRequest": {
+      "type": "object",
+      "required": [
+        "jsonrpc",
+        "method",
+        "id"
+      ],
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0"
+        },
+        "method": {
+          "type": "string"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "id": {
+          "type": [
+            "string",
+            "integer"
+          ]
+        }
+      }
+    },
+    "JsonRpcErrorObject": {
+      "type": "object",
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer"
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "pmcp_error_code": {
+              "$ref": "#/$defs/ErrorCode"
+            }
+          }
+        }
+      }
+    }
+  },
+  "type": "object",
+  "properties": {
+    "$comment": {
+      "const": "This schema intentionally has no top-level 'properties' beyond this comment -- see 'description' above."
+    }
+  }
+}

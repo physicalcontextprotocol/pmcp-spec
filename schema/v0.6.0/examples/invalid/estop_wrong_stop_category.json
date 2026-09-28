@@ -1,0 +1,10 @@
+{
+  "$defRef": "EStopMessage",
+  "message": {
+    "robot_id": "arm-07",
+    "triggered_at": 1755753000.0,
+    "stop_category": 1,
+    "source": "hardware_button"
+  },
+  "whyInvalid": "E-Stop MUST always be Stop Category 0 (sec 4) -- this message claims Category 1, which is invalid for this message type. This is caught by the 'const: 0' constraint on stop_category. Note that triggered_at is a valid numeric Unix timestamp here, so the rejection cannot be an accident of a malformed timestamp; it is specifically the stop category."
+}

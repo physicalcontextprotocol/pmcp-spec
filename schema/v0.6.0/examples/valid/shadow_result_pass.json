@@ -1,0 +1,34 @@
+{
+  "$defRef": "ShadowResult",
+  "message": {
+    "verdict": "PASS",
+    "predicted_trajectory": {
+      "joint_positions": [
+        0.1,
+        0.2,
+        0.3
+      ],
+      "peak_force_n": 4.2
+    },
+    "confidence": {
+      "method": "conformal_prediction",
+      "alpha": 0.01,
+      "calibration_date": "2026-06-01",
+      "interval_widths": {
+        "force_n": 2.1,
+        "position_m": 0.003
+      }
+    },
+    "monitoring": {
+      "ensemble_disagreement": 0.02,
+      "ood_score": 0.05,
+      "in_distribution": true
+    },
+    "determinism": {
+      "input_hash": "sha256:abc123",
+      "output_hash": "sha256:def456",
+      "model_version": "hnn-v0.6.0",
+      "hardware_fingerprint": "nvidia-jetson-orin/cudnn8.9/fp16"
+    }
+  }
+}

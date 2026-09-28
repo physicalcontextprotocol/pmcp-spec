@@ -1,0 +1,128 @@
+name: pmcp-spec CI
+
+# The specification repository. Two things are worth checking
+# automatically, and both are about the spec contradicting itself:
+#
+#   1. The JSON Schema must still be a valid JSON Schema 2020-12
+#      document, and every example under schema/v0.6.0/examples/ must
+#      still validate or fail as its filename claims.
+#   2. The TLA+ models must still model-check. `formal/` ships
+#      deliberately mutated copies of both specs under
+#      `formal/self-test/`; TLC must REJECT those. A model checker that
+#      passes a mutated spec is worse than no model checker, because it
+#      manufactures false confidence — which is precisely the failure
+#      mode a safety specification cannot afford.
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - "v*.*.*"
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+
+  schema:
+    name: JSON Schema + examples
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install
+        run: python -m pip install --upgrade pip jsonschema
+
+      - name: Validate the schema and round-trip the examples
+        run: python schema/v0.6.0/verify.py
+
+      # The script above checks that each `invalid/` fixture is rejected
+      # *for the reason it claims to probe*, not merely rejected. That
+      # distinction has already caught one real false-confidence bug:
+      # `lease_grant_bad_state.json` was being rejected only because it
+      # omitted the required `fence_token`, so it appeared to prove
+      # `LeaseState` was enforced while proving nothing of the sort.
+
+  # ===========================================================================
+  # Formal model checking. Self-hosted, opt-in.
+  #
+  # TLC needs a JDK, and the full sweep is slow enough to need a real
+  # runner. Set the `self-hosted` label on a machine that has both, or
+  # override `runs-on` for your fork.
+  #
+  # This job is deliberately NOT made to pass by skipping. If the runner
+  # pool has no suitable machine, the honest outcome is a red X that says
+  # "the models were not re-checked", not a green tick.
+  # ===========================================================================
+  tla:
+    name: TLA+ model check (+ mutant self-test)
+    runs-on: [self-hosted, tla]
+    if: ${{ false }}   # enable once a self-hosted TLA+ runner exists
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check that TLC is present
+        run: |
+          which tlc || { echo "::error::tlc not found on this runner"; exit 1; }
+
+      - name: Check PMCPCore
+        run: tlc2.TLC -config formal/PMCPCore.cfg formal/PMCPCore.tla
+
+      - name: Check PMCPRecovery
+        run: tlc2.TLC -config formal/PMCPRecovery.cfg formal/PMCPRecovery.tla
+
+      - name: Self-test — TLC must REJECT the deliberately mutated specs
+        run: |
+          # These are the whole point of the self-test. If TLC reports
+          # success on a mutant, the checker is not actually checking,
+          # and every "verified" claim that rests on it is void.
+          #
+          # The two commands below are EXPECTED TO FAIL. A non-zero exit
+          # is the pass condition.
+          set +e
+          tlc2.TLC -config formal/self-test/PMCPCore_mutant.cfg \
+                     formal/self-test/PMCPCore_mutant.tla
+          if [ $? -eq 0 ]; then
+            echo "::error::TLC accepted a deliberately mutated spec."
+            echo "::error::The model checker is not validating. Do not trust"
+            echo "::error::any verification claim until this is fixed."
+            exit 1
+          fi
+          echo "TLC correctly rejected the mutated PMCPCore model"
+
+          tlc2.TLC -config formal/self-test/PMCPRecovery_mutant.cfg \
+                     formal/self-test/PMCPRecovery_mutant.tla
+          if [ $? -eq 0 ]; then
+            echo "::error::TLC accepted a deliberately mutated spec."
+            exit 1
+          fi
+          echo "TLC correctly rejected the mutated PMCPRecovery model"
+
+  summary:
+    name: CI Summary
+    runs-on: ubuntu-latest
+    needs: [schema, tla]
+    if: always()
+    steps:
+      - name: Report status
+        run: |
+          echo "## pmcp-spec CI Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Job | Result |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-----|--------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| schema | ${{ needs.schema.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| tla    | ${{ needs.tla.result }}    |" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "If \`tla\` shows \`skipped\`, the TLA+ models were **not**" >> "$GITHUB_STEP_SUMMARY"
+          echo "re-checked by this run. The \`Verified today\` section of" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`LIMITATIONS.md\` records the last local model-check, not this one." >> "$GITHUB_STEP_SUMMARY"

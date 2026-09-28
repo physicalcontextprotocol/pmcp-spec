@@ -1,0 +1,70 @@
+# gitleaks configuration for pmcp-spec
+#
+# This repository is nearly all prose, and prose about wire protocols is
+# full of things that look like credentials and are not:
+# `shadowToken` fields, `fence_token` values, Ed25519 key ids, example
+# envelopes. The default ruleset flags some of them, and a scan that
+# always comes back red is a scan nobody runs.
+#
+# Every allowlist entry below is a *documented* exception with a stated
+# reason. If you add one, the reason is the point — a bare regex
+# allowlist is how real secrets get waved through.
+#
+# Verify with:
+#     gitleaks dir . --redact
+
+title = "pmcp-spec gitleaks config"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = """
+Documentation examples in PROTOCOL_SPEC.md use obviously-synthetic
+placeholder values. `a1b2c3d4e5f6g7h8` is a sequential hex filler
+pattern, not an issued token: it is not random, it is not 32 bytes, and
+it carries no prefix, issuer, or checksum that a real credential would.
+Matched inside fenced ```json blocks only, so the same string appearing
+in executable code would still be flagged.
+"""
+paths = [
+  '''docs/PROTOCOL_SPEC[.]md''',
+  '''docs/SAFETY_ARCHITECTURE\.md''',
+  '''docs/PROJECT_EXPLANATION\.md''',
+  '''docs/PROTOCOL_README\.md''',
+  '''docs/research/.*\.md''',
+  '''schema/v0\.6\.0/examples/.*\.json''',
+]
+regexes = [
+  '''"shadowToken":\s*"[a-f0-9]{8,}"''',
+  '''"fence_token":\s*[0-9]{1,6}''',
+]
+
+[[allowlists]]
+description = """
+The formal/ directory holds TLA+ models. TLA+ uses a backslash-star for comments and
+its own operator syntax, and the model files contain long runs of
+identifier-like tokens that the generic ruleset occasionally scores as
+high-entropy strings. Nothing in formal/ is a credential: the files are
+prose-adjacent specifications, and they are checked into the repository
+as plain text with no secret material by construction.
+"""
+paths = [
+  '''formal/.*''',
+]
+
+[[allowlists]]
+description = """
+The word "MOCK_QUOTE" and the mock enclave key strings in pmcp-safety
+are referenced in prose here. They are placeholders, and the surrounding
+text says so explicitly. The same pattern appearing in an implementation
+repository is still flagged, because this allowlist is scoped to
+documentation paths in this repository only.
+"""
+paths = [
+  '''docs/.*\.md''',
+]
+regexes = [
+  '''MOCK_QUOTE''',
+  '''mock_public_key_\d{3}''',
+]
