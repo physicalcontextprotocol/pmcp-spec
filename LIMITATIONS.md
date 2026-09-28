@@ -180,6 +180,15 @@ solved:
   side (`pmcp/client.py`, `pmcp/client_v2.py`, `sdk/client.py`,
   `v05/pmcp_v5_client.py`) and three parallel server packages. Picking a
   canonical one is the highest-value open contribution in that repo.
+- **`pmcp/` in `pmcp-python` has no tests at all.** The suite under
+  `pmcp-python/tests/` exercises `v05/` exclusively (80.50% covered, and
+  that is the number the 80% CI gate is written against). All 34 modules
+  under `pmcp/` are imported by zero tests, so their real coverage is
+  **0%**, and they are where the mypy errors concentrate. `v05/` is the
+  version with evidence behind it; `pmcp/` is an earlier parallel
+  implementation that is carried but unverified. Treat `v05/` as the
+  tested surface and `pmcp/` as unproven, and note that the CI coverage
+  number covers only the former.
 - `pmcp-typescript` has **two** competing `PMCPServer`
   implementations (`src/server.ts` and `src/server_impl.ts`), re-exported
   simultaneously from `src/index.ts`.
