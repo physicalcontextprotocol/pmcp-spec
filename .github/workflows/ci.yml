@@ -76,8 +76,17 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # Pinned: tla2tools v1.8.0
+      #
+      # The tlaplus project RE-PUBLISHES the v1.8.0 release asset: the
+      # URL below serves a fresh master build each time they cut a
+      # release (the asset behind v1.8.0 was replaced on 2026-10-06 with
+      # a build of commit 94d0c50). So this pin is a point-in-time
+      # integrity check on the exact jar CI downloads and verifies — not
+      # a permanent version lock. When upstream replaces the asset, TLC's
+      # checksum check fails closed (red X, never a silent pass); refresh
+      # the hash after confirming the new jar's manifest `X-Git-Revision`.
       TLA_VERSION: "1.8.0"
-      TLA_SHA256: "ab4694601923fd5ac06452abbf847c366a5054a3d739552085edd6ed986c29ec"
+      TLA_SHA256: "7beec0f04818732a62fa193731711a99aa4f11279499b2360a7d156c519ea78d"
     steps:
       - uses: actions/checkout@v4
 
