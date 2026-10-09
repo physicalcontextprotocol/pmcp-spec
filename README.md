@@ -7,7 +7,7 @@ the source-of-truth repository. Every SDK (`pmcp-python`,
 of them is the reference implementation.
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Protocol Version](https://img.shields.io/badge/P--MCP-v0.5-brightgreen.svg)](docs/PROTOCOL_SPEC.md)
+[![Protocol Version](https://img.shields.io/badge/protocol-v0.5-brightgreen.svg)](docs/PROTOCOL_SPEC.md) [![Schema Version](https://img.shields.io/badge/schema-v0.6.0-blue.svg)](schema/v0.6.0/pmcp.schema.json)
 [![MCP Compatible](https://img.shields.io/badge/MCP-2024--11--05-orange.svg)](https://modelcontextprotocol.io)
 
 > **Before you rely on this: read [`LIMITATIONS.md`](LIMITATIONS.md).**
