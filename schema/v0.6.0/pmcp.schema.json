@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.physicalcontextprotocol.org/v0.6.0/pmcp.schema.json",
-  "title": "P-MCP Protocol Schema",
-  "description": "This top-level schema is a $defs container, not a single message shape -- P-MCP has many message types (see $defs above), each validated individually. A per-message-type JSON-RPC method registry (mapping method name -> request/response $ref pairs) is the next artifact needed here, not yet written -- see docs/SAFETY_ARCHITECTURE.md sec 11 open items.",
+  "title": "PCP Protocol Schema",
+  "description": "This top-level schema is a $defs container, not a single message shape -- PCP has many message types (see $defs above), each validated individually. A per-message-type JSON-RPC method registry (mapping method name -> request/response $ref pairs) is the next artifact needed here, not yet written -- see docs/SAFETY_ARCHITECTURE.md sec 11 open items.",
   "version": "0.6.0",
   "$defs": {
     "LeaseState": {
@@ -447,7 +447,7 @@
             "null"
           ],
           "additionalProperties": true,
-          "description": "Robot-class-specific predicted trajectory/forces/energy. Left open (additionalProperties) deliberately -- see pmcp-servers per-robot-class schemas for concrete shapes. Optional/nullable: physics or geometric simulators may predict a single resulting pose rather than a full trajectory; report that honestly as null here rather than fabricate trajectory samples."
+          "description": "Robot-class-specific predicted trajectory/forces/energy. Left open (additionalProperties) deliberately -- see pcp-servers per-robot-class schemas for concrete shapes. Optional/nullable: physics or geometric simulators may predict a single resulting pose rather than a full trajectory; report that honestly as null here rather than fabricate trajectory samples."
         },
         "confidence": {
           "anyOf": [
@@ -458,7 +458,7 @@
               "type": "null"
             }
           ],
-          "description": "Optional/nullable. Requires the HNN-Simplex monitor's conformal-prediction calibration -- an open research item (see pmcp-spec docs/research), not implemented in any reference SDK as of this version. Do not populate with fabricated values."
+          "description": "Optional/nullable. Requires the HNN-Simplex monitor's conformal-prediction calibration -- an open research item (see pcp-spec docs/research), not implemented in any reference SDK as of this version. Do not populate with fabricated values."
         },
         "monitoring": {
           "anyOf": [
@@ -480,7 +480,7 @@
               "type": "null"
             }
           ],
-          "description": "Optional/nullable. Requires cross-hardware determinism budget measurement -- an open research item (see pmcp-spec docs/research), not implemented in any reference SDK as of this version. Do not populate with fabricated values."
+          "description": "Optional/nullable. Requires cross-hardware determinism budget measurement -- an open research item (see pcp-spec docs/research), not implemented in any reference SDK as of this version. Do not populate with fabricated values."
         },
         "status": {
           "type": "string",

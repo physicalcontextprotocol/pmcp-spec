@@ -1,6 +1,6 @@
-# P-MCP — Physical Model Context Protocol
+# PCP — Physical Context Protocol
 
-> **P-MCP is the USB-C port for robot AI.**  
+> **PCP is the USB-C port for robot AI.**  
 > An open standard that enables any MCP-compatible AI client to control physical robots safely.
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -10,12 +10,12 @@
 
 ---
 
-## What is P-MCP?
+## What is PCP?
 
-P-MCP (Physical Model Context Protocol) is to robots what Anthropic's [Model Context Protocol](https://modelcontextprotocol.io) is to data sources — a universal integration layer.
+PCP (Physical Context Protocol) is to robots what Anthropic's [Model Context Protocol](https://modelcontextprotocol.io) is to data sources — a universal integration layer.
 
 **v0.5 is the first version with full MCP wire compatibility:**  
-Claude Desktop, Cursor, ChatGPT, and any MCP client can directly connect to P-MCP robot servers.
+Claude Desktop, Cursor, ChatGPT, and any MCP client can directly connect to PCP robot servers.
 
 ```
 Claude Desktop / Cursor / ChatGPT / Custom LLM
@@ -23,7 +23,7 @@ Claude Desktop / Cursor / ChatGPT / Custom LLM
             │  Standard MCP Protocol (JSON-RPC 2.0)
             ▼
     ┌─────────────────────────────────────────┐
-    │       P-MCP Server (robot-side)         │
+    │       PCP Server (robot-side)         │
     │                                         │
     │  tools/list    → Robot actuations       │
     │  tools/call    → Safety → Execute       │
@@ -52,7 +52,7 @@ Add to `claude_desktop_config.json`:
   "mcpServers": {
     "robot-arm": {
       "command": "python",
-      "args": ["/path/to/P-MCP/v05/robot_servers/arm_server.py"]
+      "args": ["/path/to/PCP/v05/robot_servers/arm_server.py"]
     }
   }
 }
@@ -84,9 +84,9 @@ asyncio.run(server.run())  # stdio — compatible with Claude Desktop
 
 ---
 
-## Why P-MCP?
+## Why PCP?
 
-| Problem | P-MCP Solution |
+| Problem | PCP Solution |
 |---------|---------------|
 | Every robot has a different API | `tools/list` + `tools/call` (universal MCP) |
 | LLMs can't safely command hardware | Mandatory shadow preview before any execution |
@@ -113,7 +113,7 @@ asyncio.run(server.run())  # stdio — compatible with Claude Desktop
 
 ## What This Is
 
-P-MCP is an open protocol for **LLM-to-robot tool calling** — the bridge between
+PCP is an open protocol for **LLM-to-robot tool calling** — the bridge between
 AI reasoning and physical-world actuation. It defines how an AI agent safely
 invokes motor commands, with a layered stack of guarantees:
 
@@ -141,7 +141,7 @@ ROS2 / OPC-UA / Viam / Serial  ──→  Physical Robot
 | **Identity**  | W3C DIDs + Ed25519          | Who is this machine? Can I trust its sig?   |
 | **Governance**| TEE Safety Constitution     | What physical laws can't it break?          |
 | **Coordination**| Spatiotemporal CRDT Ledger| How to share 4D space without a central boss? |
-| **Actuation** | P-MCP Tool Synthesis        | How does a "thought" become motor torque?   |
+| **Actuation** | PCP Tool Synthesis        | How does a "thought" become motor torque?   |
 
 ---
 
@@ -236,7 +236,7 @@ python v03/main_pmcp_v3.py
                              │  invoke(tool_name, **args)
                              │  [+ zk_proof optional L15]
 ┌────────────────────────────▼────────────────────────────────────┐
-│                       PMCP SERVER v0.4                          │
+│                       PCP SERVER v0.4                          │
 │  ┌──────────────┐  ┌──────────────┐  ┌───────────────────────┐ │
 │  │ Tool Registry│  │ ZK Verifier  │  │  Auction Pool         │ │
 │  │ (static +    │  │ (L15)        │  │  (Vickrey v0.2)       │ │
@@ -391,7 +391,7 @@ No game-theoretic incentive to underbid. Economic optimum is stable.
 ## Phase 3 & 4 Components (v0.5+)
 
 ### Plugin Marketplace (`marketplace/`)
-A pip-installable REST API for distributing P-MCP plugins:
+A pip-installable REST API for distributing PCP plugins:
 - SQLite/FTS5 backend with full-text search over plugin descriptions
 - SHA-256 archive verification on upload and install
 - Review system, category browsing, download stats
@@ -407,7 +407,7 @@ Off-chain ERC-20-style robot token ledger with staking and auctions:
 - Runs on port 9001: `pmcp-depin`
 
 ### Dynamic Tool Synthesis v2 (`pmcp/tools/synthesis.py`)
-Auto-compose P-MCP tool schemas from intent + robot capability profile:
+Auto-compose PCP tool schemas from intent + robot capability profile:
 - `CapabilityProfile` — classifies a robot's available actuations/sensors
 - `BUILTIN_TEMPLATES` — pick_and_place, patrol_waypoints, inspect_joints, charge_and_resume
 - Python codegen produces a `SynthesisedTool` with full JSON Schema
@@ -437,7 +437,7 @@ Autonomous Chief Operating Officer for multi-robot fleets:
 - Runs on port 9010: `pmcp-swarm-coo`
 
 ### ISO/IEC Compliance Harness (`compliance/`)
-Automated standard compliance checks against any live P-MCP robot:
+Automated standard compliance checks against any live PCP robot:
 - **ISO 10218-1/2** — E-stop cycle, actuation blocking, lease mechanism, metrics
 - **IEC 62443-3-3** — Protocol version, robot ID uniqueness, ping latency < 500 ms
 - **ISO 13849-1** — Safety controller declaration

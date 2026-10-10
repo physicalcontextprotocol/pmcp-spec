@@ -1,9 +1,9 @@
-# pmcp-spec
+# pcp-spec
 
-**The Physical Model Context Protocol (P-MCP) specification.** This is
-the source-of-truth repository. Every SDK (`pmcp-python`,
-`pmcp-typescript`, `pmcp-rust`) and the conformance suite
-(`pmcp-conformance`) implements against what is defined here, and none
+**The Physical Context Protocol (PCP) specification.** This is
+the source-of-truth repository. Every SDK (`pcp-python`,
+`pcp-typescript`, `pcp-rust`) and the conformance suite
+(`pcp-conformance`) implements against what is defined here, and none
 of them is the reference implementation.
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
@@ -16,9 +16,9 @@ of them is the reference implementation.
 > to close. A safety protocol that will not tell you what it has not
 > proven is not one you should trust.
 
-## What P-MCP does
+## What PCP does
 
-P-MCP is a thin protocol layer that lets any MCP-compatible AI client
+PCP is a thin protocol layer that lets any MCP-compatible AI client
 — Claude, GPT, Grok, Gemini, a local Ollama — command physical robots
 through the standard MCP `tools/call` interface. The safety pipeline
 lives on the robot side of the wire, not in the model's good
@@ -29,7 +29,7 @@ Any LLM (Claude · GPT · Grok · Gemini · Ollama)
               │  Standard MCP JSON-RPC 2.0
               ▼
     ┌──────────────────────────────────────────────────┐
-    │           P-MCP Server (robot-side)              │
+    │           PCP Server (robot-side)              │
     │                                                  │
     │  tools/list   → Robot actuations                 │
     │  tools/call   → E-Stop → Lease → Constitution →  │
@@ -129,13 +129,13 @@ behaviour of real hardware. See `LIMITATIONS.md`.
 
 | Repository | What it is |
 |---|---|
-| [`pmcp-python`](https://github.com/physicalcontextprotocol/pmcp-python) | Python SDK — 214 tests collected, 213 pass / 1 skip by default |
-| [`pmcp-typescript`](https://github.com/physicalcontextprotocol/pmcp-typescript) | TypeScript SDK — skeleton, does not compile yet, no tests |
-| [`pmcp-rust`](https://github.com/physicalcontextprotocol/pmcp-rust) | Rust crates — `pmcp-core` builds with 43 tests; `pmcp-ledger` does not compile |
-| [`pmcp-conformance`](https://github.com/physicalcontextprotocol/pmcp-conformance) | 42 tests any implementation must pass |
-| [`pmcp-safety`](https://github.com/physicalcontextprotocol/pmcp-safety) | Safety loop, TEE attestator, multisig gate, edge hardening |
-| [`pmcp-servers`](https://github.com/physicalcontextprotocol/pmcp-servers) | Illustrative robot servers |
-| [`pmcp-registry`](https://github.com/physicalcontextprotocol/pmcp-registry) | Experimental — **do not expose to an untrusted network** |
+| [`pcp-python`](https://github.com/physicalcontextprotocol/pcp-python) | Python SDK — 214 tests collected, 213 pass / 1 skip by default |
+| [`pcp-typescript`](https://github.com/physicalcontextprotocol/pcp-typescript) | TypeScript SDK — skeleton, does not compile yet, no tests |
+| [`pcp-rust`](https://github.com/physicalcontextprotocol/pcp-rust) | Rust crates — `pcp-core` builds with 43 tests; `pcp-ledger` does not compile |
+| [`pcp-conformance`](https://github.com/physicalcontextprotocol/pcp-conformance) | 42 tests any implementation must pass |
+| [`pcp-safety`](https://github.com/physicalcontextprotocol/pcp-safety) | Safety loop, TEE attestator, multisig gate, edge hardening |
+| [`pcp-servers`](https://github.com/physicalcontextprotocol/pcp-servers) | Illustrative robot servers |
+| [`pcp-registry`](https://github.com/physicalcontextprotocol/pcp-registry) | Experimental — **do not expose to an untrusted network** |
 
 Organization overview and per-repository maturity:
 [`physicalcontextprotocol`](https://github.com/physicalcontextprotocol).

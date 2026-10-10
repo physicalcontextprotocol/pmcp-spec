@@ -1,4 +1,4 @@
-name: pmcp-spec CI
+name: pcp-spec CI
 
 # The specification repository. Two things are worth checking
 # automatically, and both are about the spec contradicting itself:
@@ -147,7 +147,7 @@ jobs:
     steps:
       - name: Report status
         run: |
-          echo "## pmcp-spec CI Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "## pcp-spec CI Summary" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "| Job | Result |" >> "$GITHUB_STEP_SUMMARY"
           echo "|-----|--------|" >> "$GITHUB_STEP_SUMMARY"

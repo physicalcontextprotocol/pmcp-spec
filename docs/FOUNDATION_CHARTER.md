@@ -1,4 +1,4 @@
-# P-MCP Foundation Governance Charter
+# PCP Foundation Governance Charter
 
 > **Version:** 1.0  
 > **Effective Date:** May 2026  
@@ -8,7 +8,7 @@
 
 ## Preamble
 
-This document establishes the governance framework for the P-MCP (Physical Model Context Protocol) open standard. The Foundation is dedicated to creating a universal protocol that enables any MCP-compatible AI client to safely control physical robots, fostering interoperability, safety, and innovation in robotics and industrial automation.
+This document establishes the governance framework for the PCP (Physical Context Protocol) open standard. The Foundation is dedicated to creating a universal protocol that enables any MCP-compatible AI client to safely control physical robots, fostering interoperability, safety, and innovation in robotics and industrial automation.
 
 The protocol described in this charter aims to be the "USB-C port for robot AI"—a standardized interface that bridges AI reasoning systems with physical actuation across diverse robotic platforms and industrial environments.
 
@@ -18,7 +18,7 @@ The protocol described in this charter aims to be the "USB-C port for robot AI"�
 
 ### 1.1 Mission
 
-The P-MCP Foundation exists to:
+The PCP Foundation exists to:
 
 1. **Standardize** the interface between AI systems and physical robots through an open, vendor-neutral protocol
 2. **Promote** safety-first design in all AI-to-robot interactions
@@ -198,7 +198,7 @@ Proposal → Draft → Review → Ratification → Published → Deprecated
 
 - All specifications: Apache 2.0
 - All code: Apache 2.0 (or MIT)
-- Trademarks: Policy for use of P-MCP marks
+- Trademarks: Policy for use of PCP marks
 
 ### 6.2 Patents
 
@@ -228,7 +228,7 @@ All compliant implementations must:
 ### 7.2 Compliance Program
 
 - **Conformance Testing:** Automated test suites
-- **Certification Badges:** "P-MCP Compliant" certification
+- **Certification Badges:** "PCP Compliant" certification
 - **Compliance Registry:** Public list of certified implementations
 
 ### 7.3 Standards Alignment
@@ -301,11 +301,11 @@ Upon founding:
 
 | Term | Definition |
 |------|-------------|
-| **P-MCP** | Physical Model Context Protocol |
+| **PCP** | Physical Context Protocol |
 | **Spec** | Protocol specification |
 | **Implementation** | Code implementing the spec |
 | **Compliant** | Meets all Core spec requirements |
-| **Foundation** | P-MCP Foundation |
+| **Foundation** | PCP Foundation |
 | **TSC** | Technical Steering Committee |
 | **WG** | Working Group |
 
@@ -337,8 +337,8 @@ Contact: conduct@pmcp.io
 
 ### B.1 Permitted Use
 
-- "P-MCP Compliant" for certified implementations
-- "P-MCP Compatible" for tested integrations
+- "PCP Compliant" for certified implementations
+- "PCP Compatible" for tested integrations
 - Foundation logo for official activities
 
 ### B.2 Prohibited Use

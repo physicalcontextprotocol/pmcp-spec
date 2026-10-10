@@ -1,4 +1,4 @@
-# gitleaks configuration for pmcp-spec
+# gitleaks configuration for pcp-spec
 #
 # This repository is nearly all prose, and prose about wire protocols is
 # full of things that look like credentials and are not:
@@ -13,7 +13,7 @@
 # Verify with:
 #     gitleaks dir . --redact
 
-title = "pmcp-spec gitleaks config"
+title = "pcp-spec gitleaks config"
 
 [extend]
 useDefault = true
@@ -55,7 +55,7 @@ paths = [
 
 [[allowlists]]
 description = """
-The word "MOCK_QUOTE" and the mock enclave key strings in pmcp-safety
+The word "MOCK_QUOTE" and the mock enclave key strings in pcp-safety
 are referenced in prose here. They are placeholders, and the surrounding
 text says so explicitly. The same pattern appearing in an implementation
 repository is still flagged, because this allowlist is scoped to

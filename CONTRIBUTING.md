@@ -1,8 +1,8 @@
-# Contributing to pmcp-spec
+# Contributing to pcp-spec
 
-The source-of-truth repository for the Physical Model Context Protocol.
-Everything else — `pmcp-python`, `pmcp-typescript`, `pmcp-rust`,
-`pmcp-conformance` — implements against what is defined here.
+The source-of-truth repository for the Physical Context Protocol.
+Everything else — `pcp-python`, `pcp-typescript`, `pcp-rust`,
+`pcp-conformance` — implements against what is defined here.
 
 The organization-wide contributor policy lives in
 [`physicalcontextprotocol/.github`](https://github.com/physicalcontextprotocol/.github/blob/main/CONTRIBUTING.md).

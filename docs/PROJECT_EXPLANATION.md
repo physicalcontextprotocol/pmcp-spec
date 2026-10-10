@@ -1,14 +1,14 @@
-# P-MCP Project Explanation
+# PCP Project Explanation
 
-This document provides a comprehensive explanation of P-MCP (Physical Model Context Protocol) from the ground up. Whether you're a developer, researcher, or simply curious about what this project does, this guide will walk you through everything you need to know.
+This document provides a comprehensive explanation of PCP (Physical Context Protocol) from the ground up. Whether you're a developer, researcher, or simply curious about what this project does, this guide will walk you through everything you need to know.
 
 ---
 
 ## Table of Contents
 
-1. [What is P-MCP?](#what-is-p-mcp)
+1. [What is PCP?](#what-is-p-mcp)
 2. [The Problem It Solves](#the-problem-it-solves)
-3. [How P-MCP Works - Architecture Overview](#how-p-mcp-works---architecture-overview)
+3. [How PCP Works - Architecture Overview](#how-p-mcp-works---architecture-overview)
 4. [Protocol Versions and Evolution](#protocol-versions-and-evolution)
 5. [Core Concepts](#core-concepts)
 6. [The Four Columns of Sovereignty](#the-four-columns-of-sovereignty)
@@ -21,11 +21,11 @@ This document provides a comprehensive explanation of P-MCP (Physical Model Cont
 
 ---
 
-## What is P-MCP?
+## What is PCP?
 
-**P-MCP (Physical Model Context Protocol)** is an open standard that enables any MCP-compatible AI client (like Claude Desktop, Cursor, ChatGPT, or custom LLM applications) to control physical robots safely.
+**PCP (Physical Context Protocol)** is an open standard that enables any MCP-compatible AI client (like Claude Desktop, Cursor, ChatGPT, or custom LLM applications) to control physical robots safely.
 
-Think of it as the "USB-C port for robot AI" - just as USB-C provides a universal connection between your computer and devices, P-MCP provides a universal connection between AI agents and physical robots.
+Think of it as the "USB-C port for robot AI" - just as USB-C provides a universal connection between your computer and devices, PCP provides a universal connection between AI agents and physical robots.
 
 ### Key Highlights
 
@@ -39,9 +39,9 @@ Think of it as the "USB-C port for robot AI" - just as USB-C provides a universa
 
 ## The Problem It Solves
 
-Before P-MCP, connecting AI to robots was difficult and risky:
+Before PCP, connecting AI to robots was difficult and risky:
 
-| Problem | Description | P-MCP Solution |
+| Problem | Description | PCP Solution |
 |---------|-------------|----------------|
 | **API Fragmentation** | Every robot brand has a different API | Universal MCP tool calling |
 | **Safety Risks** | LLMs can issue dangerous commands to hardware | Mandatory shadow validation before execution |
@@ -52,9 +52,9 @@ Before P-MCP, connecting AI to robots was difficult and risky:
 
 ---
 
-## How P-MCP Works - Architecture Overview
+## How PCP Works - Architecture Overview
 
-Here's how an AI assistant controls a robot using P-MCP:
+Here's how an AI assistant controls a robot using PCP:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -66,7 +66,7 @@ Here's how an AI assistant controls a robot using P-MCP:
                              │  tool_use (JSON schema)
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                       P-MCP SERVER (v0.5)                       │
+│                       PCP SERVER (v0.5)                       │
 │  ┌─────────────────────────────────────────────────────────┐   │
 │  │              Tool Registry (MCP tools)                  │   │
 │  │   - move_to, grip, arm_move, navigation, etc.            │   │
@@ -120,7 +120,7 @@ Here's how an AI assistant controls a robot using P-MCP:
 
 1. **AI Request**: The AI assistant wants the robot to move to a specific position
 2. **Tool Call**: The request comes through as a standard MCP tool call
-3. **Shadow Validation**: The P-MCP server runs a "shadow" simulation to check if the move is safe
+3. **Shadow Validation**: The PCP server runs a "shadow" simulation to check if the move is safe
 4. **Digital Twin**: The virtual representation of the robot verifies the move
 5. **Safety Check**: The TEE (Trusted Execution Environment) gate verifies the command meets safety rules
 6. **Hardware Execution**: The safe command is sent to the actual robot
@@ -129,7 +129,7 @@ Here's how an AI assistant controls a robot using P-MCP:
 
 ## Protocol Versions and Evolution
 
-P-MCP has evolved through multiple versions, each adding important capabilities:
+PCP has evolved through multiple versions, each adding important capabilities:
 
 | Version | Name | Key Features |
 |---------|------|---------------|
@@ -142,7 +142,7 @@ P-MCP has evolved through multiple versions, each adding important capabilities:
 ### v0.5 - The Current Version
 
 Version 0.5 is the first version with **full MCP wire compatibility**. This means:
-- Claude Desktop can directly connect to P-MCP robot servers
+- Claude Desktop can directly connect to PCP robot servers
 - Cursor, ChatGPT, and any MCP client can control robots
 - Clean, simple SDK for building your own robot servers
 - Pre-built servers for: Arm robots, Mobile robots, Agricultural robots
@@ -153,7 +153,7 @@ Version 0.5 is the first version with **full MCP wire compatibility**. This mean
 
 ### 1. MCP Tools (Actuations)
 
-In P-MCP, robot actions are exposed as **MCP Tools**. Examples:
+In PCP, robot actions are exposed as **MCP Tools**. Examples:
 
 - `move_to` - Move robot to X, Y, Z position
 - `gripper_open` / `gripper_close` - Control gripper
@@ -201,7 +201,7 @@ The **Safety Constitution** is a set of immutable rules that cannot be violated:
 
 ### 6. Resources (Sensor Streams)
 
-P-MCP exposes robot data as **MCP Resources**:
+PCP exposes robot data as **MCP Resources**:
 - Joint angles, positions, velocities
 - Camera feeds, depth maps
 - Battery levels, temperature
@@ -218,14 +218,14 @@ Reusable prompt templates for common missions:
 
 ## The Four Columns of Sovereignty
 
-P-MCP is built on four foundational pillars:
+PCP is built on four foundational pillars:
 
 | Column | Technology | Purpose |
 |--------|------------|---------|
 | **Identity** | W3C DIDs + Ed25519 | Who is this machine? Can I trust its signature? |
 | **Governance** | TEE Safety Constitution | What physical laws can't it break? |
 | **Coordination** | Spatiotemporal CRDT Ledger | How to share 4D space without a central boss? |
-| **Actuation** | P-MCP Tool Synthesis | How does a "thought" become motor torque? |
+| **Actuation** | PCP Tool Synthesis | How does a "thought" become motor torque? |
 
 ### Identity (W3C DIDs + Ed25519)
 
@@ -248,7 +248,7 @@ These rules are signed by the TEE and cannot be modified or bypassed.
 
 ### Coordination (CRDT Ledger)
 
-P-MCP uses Conflict-free Replicated Data Types (CRDTs) for:
+PCP uses Conflict-free Replicated Data Types (CRDTs) for:
 - Zone reservations without central coordinator
 - Fault-tolerant coordination across network partitions
 - Horizontal scaling to 100+ robots
@@ -286,7 +286,7 @@ Connect Claude Desktop to a robot arm by adding this to your `claude_desktop_con
   "mcpServers": {
     "robot-arm": {
       "command": "python",
-      "args": ["/path/to/P-MCP/v05/robot_servers/arm_server.py"]
+      "args": ["/path/to/PCP/v05/robot_servers/arm_server.py"]
     }
   }
 }
@@ -320,7 +320,7 @@ asyncio.run(server.run())  # stdio - compatible with Claude Desktop
 ## Code Structure and Files
 
 ```
-P-MCP/
+PCP/
 ├── pmcp_grand_unified.py    # Single file: entire v0.1→v0.4 stack (2900+ lines)
 │
 ├── v01/                      # v0.1 - Core schemas
@@ -392,7 +392,7 @@ P-MCP/
 
 ### Safety Layers
 
-P-MCP implements multiple safety layers:
+PCP implements multiple safety layers:
 
 1. **Shadow Validator**: Simulates every command before execution
 2. **Safety Constitution**: Immutable rules enforced by TEE
@@ -454,7 +454,7 @@ P-MCP implements multiple safety layers:
 
 ### License
 
-P-MCP is licensed under **Apache 2.0** - the same license used by many open-source projects including Kubernetes, Spark, and Swift. This means you can:
+PCP is licensed under **Apache 2.0** - the same license used by many open-source projects including Kubernetes, Spark, and Swift. This means you can:
 
 - Use it in commercial products
 - Modify and distribute the code
@@ -473,9 +473,9 @@ The project welcomes contributions! Key areas for contribution:
 
 ### Resources
 
-- **GitHub**: https://github.com/physicalcontextprotocol/pmcp-spec
-- **Documentation**: https://github.com/physicalcontextprotocol/pmcp-spec/blob/main/docs/PROTOCOL_README.md
-- **Protocol Spec**: https://github.com/physicalcontextprotocol/pmcp-spec/blob/main/docs/PROTOCOL_SPEC.md
+- **GitHub**: https://github.com/physicalcontextprotocol/pcp-spec
+- **Documentation**: https://github.com/physicalcontextprotocol/pcp-spec/blob/main/docs/PROTOCOL_README.md
+- **Protocol Spec**: https://github.com/physicalcontextprotocol/pcp-spec/blob/main/docs/PROTOCOL_SPEC.md
 
 ---
 
@@ -488,10 +488,10 @@ The project welcomes contributions! Key areas for contribution:
 pip install cryptography
 
 # Full installation
-pip install pmcp[full]
+pip install physicalcontextprotocol[full]
 
 # Development
-pip install pmcp[dev]
+pip install physicalcontextprotocol[dev]
 ```
 
 ### Running a Robot Server

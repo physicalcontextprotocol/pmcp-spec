@@ -1,6 +1,6 @@
 ---- MODULE PMCPCore_mutant ----
 (***************************************************************************)
-(* P-MCP core safety state machine: a single robot's lease acquisition,   *)
+(* PCP core safety state machine: a single robot's lease acquisition,   *)
 (* the Lease -> Constitution -> Shadow gate sequence, E-Stop bypass, and  *)
 (* heartbeat/watchdog. Models SAFETY_ARCHITECTURE.md sections 3, 5, 6.    *)
 (*                                                                         *)

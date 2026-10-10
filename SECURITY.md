@@ -48,15 +48,15 @@ details of an unfixed vulnerability publicly.
 
 | Repository | Supported | Notes |
 |---|---|---|
-| `pmcp-spec` | yes | v0.5 protocol line and JSON Schema v0.6.0 |
-| `pmcp-python` | yes | v0.5 line |
-| `pmcp-typescript` | best-effort | v0.5, skeleton SDK — no test suite yet |
-| `pmcp-rust` | best-effort | `pmcp-core` only; `pmcp-ledger` does not currently compile |
-| `pmcp-conformance` | best-effort | v0.5 |
-| `pmcp-safety` | best-effort | TEE attestator and safety-loop are mock-backed |
-| `pmcp-servers` | best-effort | illustrative only, no hardware drivers |
-| `pmcp-registry` | **not for untrusted networks** | no auth, CORS `*` on write verbs, no body-size limit |
-| `pmcp-labs` | **no** | private quarantine; no support, no guarantees |
+| `pcp-spec` | yes | v0.5 protocol line and JSON Schema v0.6.0 |
+| `pcp-python` | yes | v0.5 line |
+| `pcp-typescript` | best-effort | v0.5, skeleton SDK — no test suite yet |
+| `pcp-rust` | best-effort | `pcp-core` only; `pcp-ledger` does not currently compile |
+| `pcp-conformance` | best-effort | v0.5 |
+| `pcp-safety` | best-effort | TEE attestator and safety-loop are mock-backed |
+| `pcp-servers` | best-effort | illustrative only, no hardware drivers |
+| `pcp-registry` | **not for untrusted networks** | no auth, CORS `*` on write verbs, no body-size limit |
+| `pcp-labs` | **no** | private quarantine; no support, no guarantees |
 
 Security guarantees for anything marked "best-effort" are provisional
 until that repository carries its own supported-version table. Each
@@ -66,23 +66,23 @@ on it.
 ## What is in scope
 
 - Correctness or safety-pipeline bypasses in the protocol
-  (`pmcp-spec`) or in the shipping v0.5 code (`pmcp-python`).
+  (`pcp-spec`) or in the shipping v0.5 code (`pcp-python`).
 - Auth, authorization, injection, deserialization, resource-exhaustion
   or SSRF issues in network-facing components, especially
-  `pmcp-registry`.
-- Supply-chain issues in the SDKs (`pmcp-python`, `pmcp-typescript`,
-  `pmcp-rust`).
+  `pcp-registry`.
+- Supply-chain issues in the SDKs (`pcp-python`, `pcp-typescript`,
+  `pcp-rust`).
 - Leaked secrets or credentials in any repository in this organization.
 
 ## What is not in scope
 
-- Clearly labelled placeholder or mock code. `pmcp-safety`'s
-  `tee-attestator` ships `MOCK_QUOTE` and `pmcp-safety`'s safety loop
+- Clearly labelled placeholder or mock code. `pcp-safety`'s
+  `tee-attestator` ships `MOCK_QUOTE` and `pcp-safety`'s safety loop
   defaults to `--simulator mock`. These are documented limitations, not
   vulnerabilities.
-- Examples and demos under `pmcp-servers/examples/` — illustrative.
-- Anything in `pmcp-labs` — unsupported by policy, and not public.
-- Docker and compose files under `pmcp-labs/infra/` — they reference
+- Examples and demos under `pcp-servers/examples/` — illustrative.
+- Anything in `pcp-labs` — unsupported by policy, and not public.
+- Docker and compose files under `pcp-labs/infra/` — they reference
   pre-split paths and do not build against the current layout.
 - Attacks that require an attacker to already hold the `release`
   environment or a maintainer account.
@@ -93,7 +93,7 @@ on it.
 ## If we overclaim
 
 If you find that something is presented as more verified than it is —
-especially anything in [`LIMITATIONS.md`](https://github.com/physicalcontextprotocol/pmcp-spec/blob/main/LIMITATIONS.md)
+especially anything in [`LIMITATIONS.md`](https://github.com/physicalcontextprotocol/pcp-spec/blob/main/LIMITATIONS.md)
 that no longer matches reality — that is a real report and we will treat
 it as one. See the "Honest limitations" section of the protocol
 specification for the current list of things we know we have not

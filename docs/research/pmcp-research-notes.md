@@ -1,6 +1,6 @@
-# P-MCP Specification — Pre-Finalization Research Notes
+# PCP Specification — Pre-Finalization Research Notes
 
-**Scope.** Six research areas supporting the canonical protocol specification for P-MCP (Physical Model Context Protocol): a safety-critical robotics coordination protocol modeled on Anthropic's MCP, but for physical actuation of robots. Five-layer architecture: TEE attestation, Ed25519 robot/client identity, CRDT ledger, Hamiltonian Neural Network (HNN) physics validation, JSON-RPC 2.0 application layer. Safety-critical actuation commands pass through a gated sequence: Lease acquisition → Constitution check → Shadow (physics-simulation) validation → real actuation.
+**Scope.** Six research areas supporting the canonical protocol specification for PCP (Physical Context Protocol): a safety-critical robotics coordination protocol modeled on Anthropic's MCP, but for physical actuation of robots. Five-layer architecture: TEE attestation, Ed25519 robot/client identity, CRDT ledger, Hamiltonian Neural Network (HNN) physics validation, JSON-RPC 2.0 application layer. Safety-critical actuation commands pass through a gated sequence: Lease acquisition → Constitution check → Shadow (physics-simulation) validation → real actuation.
 
 For each area: key concepts to get right, safety/robotics-specific pitfalls, and 2–4 concrete references to read in full.
 
@@ -10,7 +10,7 @@ For each area: key concepts to get right, safety/robotics-specific pitfalls, and
 
 ### Key concepts to get right
 
-- **TypeScript-first, JSON Schema as derivative.** MCP defines its schema in `schema.ts` (TypeScript) and emits `schema.json` as a derived artifact. The TypeScript file is the source of truth; the JSON Schema exists for non-TS consumers and tooling. This is the opposite of OpenAPI/AsyncAPI, where YAML/JSON *is* the source of truth. For P-MCP, given you want Rust + Python + TS SDKs, you should pick one direction deliberately — see §4.
+- **TypeScript-first, JSON Schema as derivative.** MCP defines its schema in `schema.ts` (TypeScript) and emits `schema.json` as a derived artifact. The TypeScript file is the source of truth; the JSON Schema exists for non-TS consumers and tooling. This is the opposite of OpenAPI/AsyncAPI, where YAML/JSON *is* the source of truth. For PCP, given you want Rust + Python + TS SDKs, you should pick one direction deliberately — see §4.
 - **Dated spec versions, not semver.** MCP versions specs by date (`2025-03-26`, `2025-06-18`, `2026-07-28`). Schema/JSON files are tagged to the spec date, not bumped through `MAJOR.MINOR.PATCH`. The implicit contract: breaking changes only happen at date-stamped releases, and any SDK pinning a date-version has a frozen contract.
 - **Capability negotiation is a per-peer, bi-directional advertisement.** Both `ClientCapabilities` and `ServerCapabilities` are declared in the `Initialize` request/response. Capabilities are *additive* and *opt-in*: a feature exists in the spec but a peer must advertise it before you can use it. Critically, MCP does **not** negotiate down — there is no "highest common denominator" — each direction advertises independently.
 - **Method namespacing with dotted prefixes.** `tools/call`, `resources/read`, `prompts/get`. Reserved prefixes (`resources/`, `prompts/`, `tools/`, `logging/`, `completion/`, `notifications/`) are owned by the spec; custom methods use reverse-DNS or vendor prefixes.
@@ -20,9 +20,9 @@ For each area: key concepts to get right, safety/robotics-specific pitfalls, and
 ### Pitfalls to avoid
 
 - **Treating capability advertisement as a contract.** Advertising `tools` doesn't mean the server implements every method — you still need per-method probing or graceful fallback. For safety-critical actuation, this is unacceptable: you must require *positive capability declaration plus per-method precondition check* before issuing any actuation command.
-- **Implicit assumption of bidirectional capability symmetry.** A client advertising `roots` doesn't mean the server can handle `roots/list` — these are separate directions. P-MCP's lease/constitution/shadow gating should declare capabilities on *both* sides explicitly per gate.
+- **Implicit assumption of bidirectional capability symmetry.** A client advertising `roots` doesn't mean the server can handle `roots/list` — these are separate directions. PCP's lease/constitution/shadow gating should declare capabilities on *both* sides explicitly per gate.
 - **Version drift between schema.ts and schema.json.** MCP has had releases where the TS and JSON schema briefly diverged. If you mirror their model, your CI must run a generation-and-diff check on every PR.
-- **Using date versions without an SDK compatibility matrix.** Users have no way to know "does SDK X support spec Y" without checking docs. P-MCP should publish an explicit capability matrix.
+- **Using date versions without an SDK compatibility matrix.** Users have no way to know "does SDK X support spec Y" without checking docs. PCP should publish an explicit capability matrix.
 
 ### References to read in full
 
@@ -36,21 +36,21 @@ For each area: key concepts to get right, safety/robotics-specific pitfalls, and
 
 ### Key concepts to get right
 
-- **ISO 10218-1:2025 and 10218-2:2025** are the *current* editions (published 2025, third edition). They supersede the 2011 versions and made functional safety requirements *explicit rather than implied*. Part 1 covers the robot itself (partly-completed machinery); Part 2 covers system integration. P-MCP's spec should reference the 2025 editions, not 2011.
+- **ISO 10218-1:2025 and 10218-2:2025** are the *current* editions (published 2025, third edition). They supersede the 2011 versions and made functional safety requirements *explicit rather than implied*. Part 1 covers the robot itself (partly-completed machinery); Part 2 covers system integration. PCP's spec should reference the 2025 editions, not 2011.
 - **"Safety-rated" means something specific.** It means a function has been designed, validated, and certified to a Performance Level (PL) per ISO 13849 or SIL per IEC 62061 / IEC 61508. It is **not** a marketing term. A "safety-rated stop" carries a guaranteed response time, a dual-channel architecture, and diagnostic coverage.
-- **The dual-channel / 2-out-of-2 (2oo2) or 1-out-of-2 (1oo2) principle.** Safety-rated functions require redundant signal paths with cross-monitoring. For P-MCP, your Lease acquisition + Constitution check + Shadow validation is structurally a 3-vote gate, which exceeds 2oo2 — but you must define what happens when any single channel disagrees (fail-safe → inhibit actuation).
-- **Fail-safe default = motion-stopped, power-maintained (or removed depending on category).** ISO 10218 defines Stop Categories 0, 1, 2: Cat 0 = immediate power removal (uncontrolled); Cat 1 = controlled deceleration then power removal; Cat 2 = controlled stop with power maintained. P-MCP must specify which Stop Category each gate-failure triggers.
+- **The dual-channel / 2-out-of-2 (2oo2) or 1-out-of-2 (1oo2) principle.** Safety-rated functions require redundant signal paths with cross-monitoring. For PCP, your Lease acquisition + Constitution check + Shadow validation is structurally a 3-vote gate, which exceeds 2oo2 — but you must define what happens when any single channel disagrees (fail-safe → inhibit actuation).
+- **Fail-safe default = motion-stopped, power-maintained (or removed depending on category).** ISO 10218 defines Stop Categories 0, 1, 2: Cat 0 = immediate power removal (uncontrolled); Cat 1 = controlled deceleration then power removal; Cat 2 = controlled stop with power maintained. PCP must specify which Stop Category each gate-failure triggers.
 - **ISO/TS 15066 defines biomechanical force/pressure thresholds.** It enumerates max permissible force/pressure on 29 body regions for collaborative operation. Your Shadow validation layer's physics model must include these thresholds if any collaborative operation is in scope.
 - **IEC 61508 is the meta-standard.** It defines Safety Integrity Levels (SIL 1–4), the safety lifecycle, hazard and risk analysis, and the techniques required per SIL. SIL 2 is typical for industrial robot integration; SIL 3 for high-risk functions; SIL 4 almost never seen in robotics. Your Constitution layer should declare the target SIL per command class.
 - **ANSI/RIA R15.06 is the U.S. national adoption** of ISO 10218 with deviations. It is essentially equivalent but you must comply with both if operating in the U.S.
-- **Safety-rated monitored stop (SMS)** is the gate that brings collaborative robots to a controlled stop *before* a human enters the workspace. P-MCP's lease-expiry behavior should mirror SMS semantics.
+- **Safety-rated monitored stop (SMS)** is the gate that brings collaborative robots to a controlled stop *before* a human enters the workspace. PCP's lease-expiry behavior should mirror SMS semantics.
 
 ### Pitfalls to avoid
 
 - **Treating "stop" as a single concept.** Stop Category 0 vs 1 vs 2 have radically different failure modes and dynamics. A protocol-level "STOP" command that doesn't specify category is indefensible.
 - **Implicit assumption that software can be SIL-rated.** IEC 61508 Part 3 explicitly requires hardware-backed diagnostics for SIL 2 and above. Pure-software safety functions top out around SIL 2 with restrictive assumptions. If your HNN physics validation is pure software, your achievable SIL ceiling is bounded.
 - **Ignoring the "safety lifecycle" of IEC 61508.** The standard doesn't just require techniques at implementation time — it requires hazard analysis, safety requirements specification, verification, validation, and a *change management process*. Your protocol must produce the artifacts (audit log, hazard list, validation evidence) the lifecycle demands.
-- **Conflating "functional safety" with "security."** IEC 61508 is about random and systematic *failures*; security (adversarial attacks) is addressed by IEC 62443. P-MCP must address both — a security compromise can be a systematic safety failure, and the standards increasingly cross-reference.
+- **Conflating "functional safety" with "security."** IEC 61508 is about random and systematic *failures*; security (adversarial attacks) is addressed by IEC 62443. PCP must address both — a security compromise can be a systematic safety failure, and the standards increasingly cross-reference.
 - **Forgetting that ISO/TS 15066 requires a *speed and separation monitoring (SSM)* architecture**, not just force-limiting. SSM requires deterministic, bounded-cycle response — your lease TTL must be derived from the worst-case SSM response time, not from network latency.
 - **Publishing the spec without a hazard analysis.** ISO 12100 (general machine safety risk assessment) is the entry point that 10218, 15066, and 61508 all assume. Your spec should reference ISO 12100 as the framing methodology.
 
@@ -99,7 +99,7 @@ For each area: key concepts to get right, safety/robotics-specific pitfalls, and
 **Pitfalls:**
 
 - MAVLink doesn't enforce that acks come back in order. Implementations must track `command_id`+`target_system` and not assume FIFO.
-- The failsafe behavior is configured *on the robot*, not negotiated. A GCS cannot ask "what's your failsafe?" — it must trust the configuration. This is a major divergence from what P-MCP needs.
+- The failsafe behavior is configured *on the robot*, not negotiated. A GCS cannot ask "what's your failsafe?" — it must trust the configuration. This is a major divergence from what PCP needs.
 
 **References:**
 
@@ -155,7 +155,7 @@ For each area: key concepts to get right, safety/robotics-specific pitfalls, and
   - **OpenAPI/AsyncAPI pattern**: YAML/JSON is the source of truth; language SDKs are generated *from* the spec.
   - **MCP pattern**: TypeScript types are source of truth; JSON Schema is generated *from* TS.
 
-  For P-MCP with three SDKs (Python/TS/Rust), I recommend the **schema-first** (JSON Schema as source of truth) pattern, because:
+  For PCP with three SDKs (Python/TS/Rust), I recommend the **schema-first** (JSON Schema as source of truth) pattern, because:
   - JSON Schema is language-agnostic and parseable by all three SDKs' codegen tools.
   - It composes with JSON-RPC 2.0 natively.
   - It avoids implying TypeScript is "more equal" than the others.
@@ -180,7 +180,7 @@ For each area: key concepts to get right, safety/robotics-specific pitfalls, and
 1. **JSON Schema 2020-12 spec**: `json-schema.org/draft/2020-12/release-notes`.
 2. **quicktype docs**: `quicktype.io` and `github.com/glideapps/quicktype`. Look at the `--no-rendering` flag for splitting generation from rendering.
 3. **OpenAPI 3.1 spec** (which aligns with JSON Schema 2020-12): `spec.openapis.org/oas/v3.1.0`. Even if you don't use OpenAPI, the section on `components/schemas` and discriminators is the cleanest treatment.
-4. **AsyncAPI spec**: `asyncapi.com/docs/specifications/v2.6.0` — particularly useful if your protocol includes pub/sub or streaming primitives (which P-MCP's CRDT ledger does).
+4. **AsyncAPI spec**: `asyncapi.com/docs/specifications/v2.6.0` — particularly useful if your protocol includes pub/sub or streaming primitives (which PCP's CRDT ledger does).
 
 ---
 
@@ -257,7 +257,7 @@ For each area: key concepts to get right, safety/robotics-specific pitfalls, and
 
 A few things emerged across all six areas that I want to flag separately:
 
-1. **Define your "Safe State" first, before any other spec work.** Every standard (ISO 10218, IEC 61508, OPC-UA Safety) and every protocol (MAVLink, ROS 2 lifecycle) starts from a defined fail-safe state. P-MCP's spec doc should open with: "In any failure, fault, ambiguity, or timeout, the system transitions to Safe State within `T_safe` milliseconds. Safe State is defined as: leases revoked, motion stopped per Stop Category 1, audit log sealed."
+1. **Define your "Safe State" first, before any other spec work.** Every standard (ISO 10218, IEC 61508, OPC-UA Safety) and every protocol (MAVLink, ROS 2 lifecycle) starts from a defined fail-safe state. PCP's spec doc should open with: "In any failure, fault, ambiguity, or timeout, the system transitions to Safe State within `T_safe` milliseconds. Safe State is defined as: leases revoked, motion stopped per Stop Category 1, audit log sealed."
 
 2. **Mirror OPC-UA Part 15's "black channel" pattern.** Treat JSON-RPC 2.0, the transport, and even the TEE as a black channel that may fail arbitrarily. Your safety guarantees come from an end-to-end safety layer above them, not from trusting any single component.
 

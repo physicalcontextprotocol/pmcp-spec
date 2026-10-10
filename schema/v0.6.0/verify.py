@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Round-trip the P-MCP JSON Schema against its example fixtures.
+"""Round-trip the PCP JSON Schema against its example fixtures.
 
 Three checks, in increasing strictness:
 

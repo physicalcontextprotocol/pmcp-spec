@@ -1,4 +1,4 @@
-# P-MCP Safety Architecture (v0.7 draft)
+# PCP Safety Architecture (v0.7 draft)
 
 **Status:** Draft — supersedes the lease/CRDT design implied by the current
 `pmcp/`, `sdk/`, and `v05/` type definitions. Written after two rounds of
@@ -16,7 +16,7 @@ two independent research passes converged on the same architecture
 (monitor-controller / Simplex pattern for the ML gate) even though they
 used different vocabulary to describe it. See §10.
 
-This document is the thing every other artifact in `pmcp-org` should be
+This document is the thing every other artifact in `pcp-org` should be
 checked against: the JSON Schema, the conformance suite, and all three
 SDKs. If code and this document disagree, the document wins until it's
 formally revised.
@@ -57,7 +57,7 @@ they're load-bearing.
 ## 3. Safety invariants (the floor — prose now, TLA+ later)
 
 These are the properties that must hold at every point in the protocol.
-They're written in prose here as the minimum bar; a `pmcp-spec/formal/`
+They're written in prose here as the minimum bar; a `pcp-spec/formal/`
 PlusCal/TLA+ spec should eventually make these machine-checkable
 (tracked as follow-up, not blocking v0.6).
 
@@ -160,21 +160,21 @@ CRDT ledger.
 | MINOR (0.X.0) | Add an *optional* field, add a new message type, add a capability flag, relax a constraint | Backward compatible | Older implementations ignore what they don't know |
 | PATCH (0.0.X) | Fix spec ambiguity, add examples, clarify docs | No wire change | No implementation change needed |
 
-CI enforcement (for `pmcp-conformance`, once schema-driven): diff the
+CI enforcement (for `pcp-conformance`, once schema-driven): diff the
 new JSON Schema against the previous tagged version and reject the PR
 if it contains a MAJOR-class change without a MAJOR version bump.
 
 **Deprecation:** a field or message type must be marked deprecated for
 at least two MINOR versions before removal in a MAJOR version.
 
-## 8. Schema organization (for `pmcp-spec`)
+## 8. Schema organization (for `pcp-spec`)
 
 JSON Schema is canonical (not TypeScript — see rationale in chat/prior
-discussion: P-MCP has three peer SDKs, and a language-neutral source
+discussion: PCP has three peer SDKs, and a language-neutral source
 avoids privileging one of them).
 
 ```
-pmcp-spec/
+pcp-spec/
   schema/
     pmcp.schema.json        # canonical, JSON Schema 2020-12, versioned via $id
   generated/
@@ -196,7 +196,7 @@ pmcp-spec/
 ## 10. Resolution of the seven open design questions (research round 2)
 
 Two independent research passes (`docs/research/pmcp-deep-research.md`
-and `docs/research/P-MCP_Advanced_Safety_Review.md`) converged on the
+and `docs/research/PCP_Advanced_Safety_Review.md`) converged on the
 same underlying architecture for six of the seven questions, despite
 using different vocabulary ("advisory/oracular subsystem" vs.
 "monitor-controller/Simplex"). Where they genuinely disagree or where
@@ -251,7 +251,7 @@ trajectory/forces/energy, a conformal-prediction confidence block
 determinism block (input/output hashes, model version, hardware
 fingerprint — device/driver/cuDNN/precision). This becomes the shape of
 the `ShadowResult` type in the eventual schema — see
-`docs/research/P-MCP_Advanced_Safety_Review.md` §1.3 for the full
+`docs/research/PCP_Advanced_Safety_Review.md` §1.3 for the full
 worked JSON example.
 
 ### 10.3 Consensus-layer fail-safe — **settled, with one number left open**
@@ -305,7 +305,7 @@ location_proof ≡ uwb_distance_bound(all trusted anchors within d_max)
 
 **Open, deployment-specific:** UWB anchor count/geometry per workspace
 shape, and how a *moving* robot's location claim expires (both reports
-flag this as unresolved in the literature — P-MCP has to define its own
+flag this as unresolved in the literature — PCP has to define its own
 pattern: bound the claim's validity window tightly enough that the
 robot can't have exited its declared zone before the claim expires).
 
@@ -384,7 +384,7 @@ the field itself has no settled answer — not just gaps in the research:
    on every supported hardware target. No published shortcut exists.
 2. **Composition of conformal prediction with adversarial input** —
    conformal prediction assumes exchangeable (non-adversarial) data.
-   P-MCP needs to either explicitly scope Shadow validation's threat
+   PCP needs to either explicitly scope Shadow validation's threat
    model to non-adversarial input, or add an adversarial-robustness
    check upstream of it.
 3. **UWB anchor geometry and moving-robot location-claim expiry** — no
@@ -396,7 +396,7 @@ the field itself has no settled answer — not just gaps in the research:
   formula-only form — need a real ISO 12100 hazard analysis per robot
   class to become numbers.
 - The three items in §10.8 are open research problems, not just
-  undocumented — P-MCP has to make its own documented judgment call on
+  undocumented — PCP has to make its own documented judgment call on
   each, they won't be "found" by more research.
 - Raft cluster sizing/deployment model for lease management is not yet
   specified (research recommends 3+ nodes minimum).

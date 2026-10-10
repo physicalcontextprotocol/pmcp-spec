@@ -1,7 +1,7 @@
-# P-MCP canonical schema — v0.6.0
+# PCP canonical schema — v0.6.0
 
 `pmcp.schema.json` is the canonical, language-neutral source of truth
-for the P-MCP wire format (JSON Schema 2020-12; see
+for the PCP wire format (JSON Schema 2020-12; see
 `docs/SAFETY_ARCHITECTURE.md` §8 for why JSON Schema and not
 TypeScript is canonical here).
 
@@ -90,7 +90,7 @@ accident of a malformed timestamp.
   actually means — flagged, not resolved, in the schema's description
   field.
 - **No Rust-idiomatic generated types yet** — quicktype's Rust output
-  tends not to be idiomatic; plan is to hand-author `pmcp-rust`'s types
+  tends not to be idiomatic; plan is to hand-author `pcp-rust`'s types
   against this schema rather than blindly codegen them (see
   `docs/SAFETY_ARCHITECTURE.md` §8's directory layout note).
 - Field-level numeric constraints tied to the still-open `T_safe` /

@@ -1,4 +1,4 @@
-# P-MCP formal specification (TLA+)
+# PCP formal specification (TLA+)
 
 Two PlusCal/TLA+ models, plus a self-test suite that model-checks them with
 TLC — so that the checker is proven non-vacuous rather than just assumed to

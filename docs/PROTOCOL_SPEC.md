@@ -1,4 +1,4 @@
-# P-MCP Protocol Specification
+# PCP Protocol Specification
 
 **Version:** 0.5  
 **Spec Date:** 2026-05-21  
@@ -10,11 +10,11 @@
 
 ## Abstract
 
-The **Physical Model Context Protocol (P-MCP)** is an open protocol that standardizes how AI/LLM applications communicate with physical robot systems. P-MCP is to robots what the Model Context Protocol (MCP) is to data sources: a universal integration layer that eliminates the need for custom one-off robot drivers in every AI application.
+The **Physical Context Protocol (PCP)** is an open protocol that standardizes how AI/LLM applications communicate with physical robot systems. PCP is to robots what the Model Context Protocol (MCP) is to data sources: a universal integration layer that eliminates the need for custom one-off robot drivers in every AI application.
 
-P-MCP extends JSON-RPC 2.0 with **five physical primitives** and a mandatory **three-layer safety pipeline**. Any compliant P-MCP server (robot) can be connected to any compliant P-MCP client (LLM application) without modification.
+PCP extends JSON-RPC 2.0 with **five physical primitives** and a mandatory **three-layer safety pipeline**. Any compliant PCP server (robot) can be connected to any compliant PCP client (LLM application) without modification.
 
-> **P-MCP is the USB-C port for robot AI. Standardize once, connect everything.**
+> **PCP is the USB-C port for robot AI. Standardize once, connect everything.**
 
 ---
 
@@ -40,7 +40,7 @@ P-MCP extends JSON-RPC 2.0 with **five physical primitives** and a mandatory **t
 
 Modern AI agents can reason and plan, but have no standardized way to act in the physical world. Every robotics team builds custom robot drivers, custom LLM prompts, custom safety shims, and custom simulation harnesses — duplicated across the industry.
 
-| Problem | P-MCP Solution |
+| Problem | PCP Solution |
 |---------|---------------|
 | Every robot has a different API | `actuations/list` + `actuations/call` (universal) |
 | LLMs can't safely command hardware | Mandatory shadow preview before execution |
@@ -55,9 +55,9 @@ Modern AI agents can reason and plan, but have no standardized way to act in the
 ```
  LLM / AI Application  (Claude, GPT-4, Gemini, custom)
            |
-           |  P-MCP Protocol (JSON-RPC 2.0)
+           |  PCP Protocol (JSON-RPC 2.0)
            |
-     PMCPClient SDK             pip install pmcp
+     PMCPClient SDK             pip install physicalcontextprotocol
        list_actuations()
        shadow_preview()         <- safety-first API
        request_lease()
@@ -65,7 +65,7 @@ Modern AI agents can reason and plan, but have no standardized way to act in the
            |
            |  stdio / HTTP transport
            |
-     PMCPServer SDK             pip install pmcp
+     PMCPServer SDK             pip install physicalcontextprotocol
        @server.actuation()
        @server.sensor()
        SafetyMiddleware
@@ -90,7 +90,7 @@ Modern AI agents can reason and plan, but have no standardized way to act in the
 
 ### 3.1 JSON-RPC 2.0
 
-P-MCP uses JSON-RPC 2.0 as the base message format, identical to MCP.
+PCP uses JSON-RPC 2.0 as the base message format, identical to MCP.
 
 **Request:**
 ```json
@@ -128,12 +128,12 @@ P-MCP uses JSON-RPC 2.0 as the base message format, identical to MCP.
 ### 3.2 Protocol Version
 
 Current: `"0.5"` (matches `PMCP_VERSION` in all three reference SDKs --
-`pmcp-python`, `pmcp-rust` -- exactly; confirmed by direct inspection, not
+`pcp-python`, `pcp-rust` -- exactly; confirmed by direct inspection, not
 just asserted). Clients MUST send `protocolVersion` in `initialize`.
 Servers MUST respond with the version they will use.
 
 Note this is distinct from the JSON Schema file version
-(`pmcp-spec/schema/v0.6.0/pmcp.schema.json`), which versions the schema
+(`pcp-spec/schema/v0.6.0/pmcp.schema.json`), which versions the schema
 document itself and may run ahead of the wire protocol version as new
 message fields are specified before every SDK implements them (e.g.
 `fence_token`, added in schema v0.6.0). The two version numbers are not
@@ -185,7 +185,7 @@ Clients MUST NOT call methods for undeclared capabilities.
 
 ## 5. Physical Primitives
 
-P-MCP defines five physical primitives:
+PCP defines five physical primitives:
 
 | # | Primitive | MCP Equivalent | Purpose |
 |---|-----------|---------------|---------|
@@ -327,7 +327,7 @@ Prevent concurrent zone occupancy via Vickrey auction allocation.
 
 Every `actuations/call` MUST pass all three layers before hardware moves.
 Actual gate order (matches the reference SDK implementations in
-`pmcp-python`/`pmcp-rust` exactly -- this diagram previously showed
+`pcp-python`/`pcp-rust` exactly -- this diagram previously showed
 Constitution -> Shadow -> Lease, which was a real spec/code mismatch,
 confirmed and corrected):
 
@@ -440,7 +440,7 @@ as a notification (fire-and-forget, no round trip required).
 | -32602 | Invalid Params |
 | -32603 | Internal Error |
 
-### P-MCP Physical Safety (-33xxx)
+### PCP Physical Safety (-33xxx)
 
 | Code | Name | Meaning |
 |------|------|---------|
@@ -504,7 +504,7 @@ For multi-robot mesh networks. Topic: `pmcp/{farm_id}/{node_id}/rpc`
 ## Reference Implementation
 
 ```bash
-pip install pmcp
+pip install physicalcontextprotocol
 ```
 
 ```python
@@ -528,30 +528,30 @@ if __name__ == "__main__":
     asyncio.run(server.run())
 ```
 
-**Source:** https://github.com/physicalcontextprotocol/pmcp-spec  
+**Source:** https://github.com/physicalcontextprotocol/pcp-spec  
 **License:** Apache 2.0
 
 ---
 
 ## 12. MCP Wire Compatibility (v0.5)
 
-P-MCP v0.5 achieves full **MCP 2024-11-05 wire compatibility**. A P-MCP server is a valid MCP server — any MCP client (Claude Desktop, Cursor, Cline, custom apps) can connect without modification.
+PCP v0.5 achieves full **MCP 2024-11-05 wire compatibility**. A PCP server is a valid MCP server — any MCP client (Claude Desktop, Cursor, Cline, custom apps) can connect without modification.
 
 ### 12.1 Mapping
 
-| P-MCP Concept | MCP Primitive | Wire Method |
+| PCP Concept | MCP Primitive | Wire Method |
 |---------------|---------------|-------------|
 | Actuation | Tool | `tools/list`, `tools/call` |
 | Sensor | Resource | `resources/list`, `resources/read` |
 | Mission | Prompt | `prompts/list`, `prompts/get` |
-| Shadow Preview | Tool call (internal) | `shadow/preview` (P-MCP extension) |
+| Shadow Preview | Tool call (internal) | `shadow/preview` (PCP extension) |
 | Lease | Tool call (internal) | `lease/request`, `lease/release` |
 | Identity | Resource | `identity/get` |
 | Constitution | Resource | `constitution/get` |
 
 ### 12.2 Tool Schema Generation
 
-P-MCP automatically generates MCP-compatible tool schemas from actuation decorators:
+PCP automatically generates MCP-compatible tool schemas from actuation decorators:
 
 ```python
 @server.actuation("move_to", description="Move TCP to XYZ", max_speed_m_s=1.0)
@@ -583,7 +583,7 @@ Becomes the MCP tool schema:
 }
 ```
 
-The `x-pmcp` extension namespace carries P-MCP-specific metadata; MCP clients that don't understand it ignore it safely.
+The `x-pmcp` extension namespace carries PCP-specific metadata; MCP clients that don't understand it ignore it safely.
 
 ### 12.3 Transport
 
@@ -600,11 +600,11 @@ The `x-pmcp` extension namespace carries P-MCP-specific metadata; MCP clients th
   "mcpServers": {
     "factory-arm": {
       "command": "python",
-      "args": ["/path/to/P-MCP/v05/robot_servers/arm_server.py"]
+      "args": ["/path/to/PCP/v05/robot_servers/arm_server.py"]
     },
     "warehouse-mobile": {
       "command": "python",
-      "args": ["/path/to/P-MCP/v05/robot_servers/mobile_server.py"]
+      "args": ["/path/to/PCP/v05/robot_servers/mobile_server.py"]
     }
   }
 }
@@ -614,7 +614,7 @@ The `x-pmcp` extension namespace carries P-MCP-specific metadata; MCP clients th
 
 ## 13. LLM Integration
 
-P-MCP is LLM-agnostic. Any model with tool-calling / function-calling support can act as the planner.
+PCP is LLM-agnostic. Any model with tool-calling / function-calling support can act as the planner.
 
 ### 13.1 Supported LLM Planners
 
@@ -628,7 +628,7 @@ P-MCP is LLM-agnostic. Any model with tool-calling / function-calling support ca
 
 ### 13.2 Grok Integration Pattern
 
-Grok (xAI) uses the OpenAI-compatible API format, making P-MCP tool schemas directly usable:
+Grok (xAI) uses the OpenAI-compatible API format, making PCP tool schemas directly usable:
 
 ```python
 import openai, os
@@ -638,7 +638,7 @@ client = openai.AsyncOpenAI(
     base_url="https://api.x.ai/v1",
 )
 
-# P-MCP tools/list → OpenAI function format
+# PCP tools/list → OpenAI function format
 openai_tools = [
     {
         "type": "function",
@@ -663,15 +663,15 @@ See [`examples/example_grok_agent.py`](../examples/example_grok_agent.py) for th
 
 ### 13.3 Safety Invariant (LLM-agnostic)
 
-Regardless of which LLM is used as planner, the P-MCP safety pipeline is enforced **server-side** before any physical execution. The gate order matches §6 (Lease → Constitution → Shadow, plus an unconditional E-Stop pre-check):
+Regardless of which LLM is used as planner, the PCP safety pipeline is enforced **server-side** before any physical execution. The gate order matches §6 (Lease → Constitution → Shadow, plus an unconditional E-Stop pre-check):
 
 ```
 LLM plans  →  E-Stop pre-check  →  Lease check  →  Constitution check  →  Shadow preview (3D sim)  →  TEE gate  →  Hardware
                                                      ↑ blocked here if unsafe — LLM cannot bypass this
 ```
 
-The LLM never has direct hardware access. It proposes tool calls; P-MCP validates them. A compromised or hallucinating LLM cannot cause unsafe physical motion.
+The LLM never has direct hardware access. It proposes tool calls; PCP validates them. A compromised or hallucinating LLM cannot cause unsafe physical motion.
 
 ---
 
-*Physical Model Context Protocol — Making every robot AI-ready.*
+*Physical Context Protocol — Making every robot AI-ready.*

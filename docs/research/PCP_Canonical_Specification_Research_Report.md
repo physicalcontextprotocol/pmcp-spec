@@ -1,4 +1,4 @@
-# P-MCP (Physical Model Context Protocol): Canonical Specification Research Report
+# PCP (Physical Context Protocol): Canonical Specification Research Report
 
 **A Comprehensive Technical Research Report Informing the Design of a Safety-Critical Robotics Coordination Protocol**
 
@@ -8,7 +8,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Document Title** | P-MCP Canonical Specification Research Report |
+| **Document Title** | PCP Canonical Specification Research Report |
 | **Version** | 1.0 |
 | **Date** | August 2026 |
 | **Classification** | Technical Research / Protocol Architecture |
@@ -34,25 +34,25 @@
 
 ## 1. Executive Summary
 
-This report presents exhaustive research across six critical domains that must inform the design of the P-MCP (Physical Model Context Protocol) specification. P-MCP is proposed as a safety-critical robotics coordination protocol inspired by Anthropic's Model Context Protocol (MCP), but fundamentally redesigned for physical robot coordination rather than LLM tool invocation.
+This report presents exhaustive research across six critical domains that must inform the design of the PCP (Physical Context Protocol) specification. PCP is proposed as a safety-critical robotics coordination protocol inspired by Anthropic's Model Context Protocol (MCP), but fundamentally redesigned for physical robot coordination rather than LLM tool invocation.
 
-The current P-MCP architecture comprises five layers: Trusted Execution Environment (TEE) attestation, Ed25519 robot/client identity, CRDT-based distributed state ledger, Hamiltonian Neural Network (HNN) physics validation, and a JSON-RPC 2.0 application protocol. Safety-critical actuation follows a four-stage pipeline: Lease Acquisition, Constitution Validation, Shadow (Physics Simulation) Validation, and Real Actuation.
+The current PCP architecture comprises five layers: Trusted Execution Environment (TEE) attestation, Ed25519 robot/client identity, CRDT-based distributed state ledger, Hamiltonian Neural Network (HNN) physics validation, and a JSON-RPC 2.0 application protocol. Safety-critical actuation follows a four-stage pipeline: Lease Acquisition, Constitution Validation, Shadow (Physics Simulation) Validation, and Real Actuation.
 
 **Key findings from this research:**
 
-- **Anthropic MCP**: Provides an excellent model for capability negotiation, transport abstraction, and schema-first design. However, MCP's "at-most-once" semantics, tolerance for idempotency, and lack of timing guarantees make it fundamentally unsuitable as a direct template for physical actuation without significant extensions. P-MCP should inherit MCP's schema organization, versioning conventions, and extension patterns, but must add deterministic delivery, lease-based mutual exclusion, and physics-validated command gating.
+- **Anthropic MCP**: Provides an excellent model for capability negotiation, transport abstraction, and schema-first design. However, MCP's "at-most-once" semantics, tolerance for idempotency, and lack of timing guarantees make it fundamentally unsuitable as a direct template for physical actuation without significant extensions. PCP should inherit MCP's schema organization, versioning conventions, and extension patterns, but must add deterministic delivery, lease-based mutual exclusion, and physics-validated command gating.
 
-- **Industrial Safety Standards (ISO 10218, IEC 61508, ISO/TS 15066)**: These standards mandate specific protocol-level requirements that P-MCP's current architecture does not fully address. Critical gaps include: the absence of Safety Integrity Level (SIL) or Performance Level (PL) classification for the communication channel itself, no specified watchdog timing with deterministic upper bounds, and no formal definition of safe states or fail-safe transitions at the protocol level. The Lease-Constitution-Shadow-Actuation pipeline is a reasonable conceptual framework but requires additional stages for emergency stop propagation, heartbeat monitoring with specified timeouts, and dual-channel validation to meet SIL 2+ requirements.
+- **Industrial Safety Standards (ISO 10218, IEC 61508, ISO/TS 15066)**: These standards mandate specific protocol-level requirements that PCP's current architecture does not fully address. Critical gaps include: the absence of Safety Integrity Level (SIL) or Performance Level (PL) classification for the communication channel itself, no specified watchdog timing with deterministic upper bounds, and no formal definition of safe states or fail-safe transitions at the protocol level. The Lease-Constitution-Shadow-Actuation pipeline is a reasonable conceptual framework but requires additional stages for emergency stop propagation, heartbeat monitoring with specified timeouts, and dual-channel validation to meet SIL 2+ requirements.
 
-- **Existing Robotics Protocols**: ROS 2 (DDS), MAVLink, OPC-UA Safety, and fieldbus safety protocols (EtherCAT Safety, PROFIsafe) each solve different aspects of the problem. MAVLink's command sequencing and acknowledgement model is the closest analog to P-MCP's actuation pipeline. OPC-UA Safety provides the gold standard for certified safety communication patterns. P-MCP should study OPC-UA Safety's redundancy and timing guarantee mechanisms, MAVLink's arming/disarming paradigm, and ROS 2's lifecycle node management.
+- **Existing Robotics Protocols**: ROS 2 (DDS), MAVLink, OPC-UA Safety, and fieldbus safety protocols (EtherCAT Safety, PROFIsafe) each solve different aspects of the problem. MAVLink's command sequencing and acknowledgement model is the closest analog to PCP's actuation pipeline. OPC-UA Safety provides the gold standard for certified safety communication patterns. PCP should study OPC-UA Safety's redundancy and timing guarantee mechanisms, MAVLink's arming/disarming paradigm, and ROS 2's lifecycle node management.
 
 - **Schema-First Design**: JSON Schema Draft 2020-12 with strict semantic versioning, automated conformance testing, and multi-language code generation is the correct foundation. The report recommends AJV for runtime validation, quicktype for cross-language SDK generation, and a canonical schema repository with CI/CD-enforced compatibility checks.
 
 - **CRDTs in Safety-Critical Systems**: This is the most significant architectural concern. CRDTs are designed for eventual consistency, which is fundamentally at odds with the strong consistency and bounded latency required for physical safety. The research identifies specific timing hazards, split-brain scenarios, and convergence latency issues that make pure CRDT-based coordination insufficient for safety-critical actuation. The report recommends a hybrid approach: CRDTs for non-safety-critical state dissemination (e.g., robot status, sensor readings) combined with a consensus protocol (Raft) for safety-critical state transitions (lease grants, actuation permissions).
 
-- **Formal Specification**: TLA+ is recommended as the primary formal specification language for P-MCP, supplemented by state machine diagrams for human readability. TLA+ model checking can verify protocol invariants, safety properties ("no two robots can hold the lease for the same resource simultaneously"), and liveness properties ("every lease request eventually receives a response"). The specification should define forbidden transitions, timing constraints, and protocol invariants in TLA+, with executable test vectors derived from the model.
+- **Formal Specification**: TLA+ is recommended as the primary formal specification language for PCP, supplemented by state machine diagrams for human readability. TLA+ model checking can verify protocol invariants, safety properties ("no two robots can hold the lease for the same resource simultaneously"), and liveness properties ("every lease request eventually receives a response"). The specification should define forbidden transitions, timing constraints, and protocol invariants in TLA+, with executable test vectors derived from the model.
 
-**Overall assessment**: P-MCP's layered architecture shows sound design instincts, but the protocol requires significant hardening to meet industrial safety standards. The most critical gaps are in the safety validation pipeline (missing emergency stop handling and watchdog timing), the CRDT layer (inappropriate for safety-critical state without consensus), and the absence of formal specification. Addressing these gaps should be the top priority before any implementation begins.
+**Overall assessment**: PCP's layered architecture shows sound design instincts, but the protocol requires significant hardening to meet industrial safety standards. The most critical gaps are in the safety validation pipeline (missing emergency stop handling and watchdog timing), the CRDT layer (inappropriate for safety-critical state without consensus), and the absence of formal specification. Addressing these gaps should be the top priority before any implementation begins.
 
 ---
 
@@ -62,7 +62,7 @@ The current P-MCP architecture comprises five layers: Trusted Execution Environm
 
 Anthropic's Model Context Protocol (MCP) is a JSON-RPC 2.0-based protocol designed for structured communication between LLM applications and external tools, data sources, and services. Released in late 2024 and standardized through an open specification hosted at modelcontextprotocol.io, MCP provides a well-designed foundation for capability negotiation, transport abstraction, and schema evolution. However, it was designed for a fundamentally different domain -- LLM tool invocation with human-in-the-loop oversight -- and its architectural assumptions are not directly transferable to safety-critical physical actuation without substantial modification.
 
-This section analyzes MCP's architecture in detail, identifying conventions worth inheriting and areas requiring deliberate divergence for P-MCP.
+This section analyzes MCP's architecture in detail, identifying conventions worth inheriting and areas requiring deliberate divergence for PCP.
 
 ### Fundamental Concepts
 
@@ -86,7 +86,7 @@ MCP defines a three-phase lifecycle: **initialization** (capability exchange), *
 
 **Industry consensus**: Date-based versioning is unusual in protocol design. Semantic versioning (SemVer) is far more common for wire protocols (e.g., gRPC, HTTP/2, WebSocket subprotocols). Date-based versioning has the advantage of making each version unambiguously identifiable but sacrifices the semantic meaning of major/minor/patch increments.
 
-**Recommendation for P-MCP**: P-MCP should adopt semantic versioning rather than date-based versioning. Safety-critical protocols benefit from the explicit communication of breaking changes (major version), backward-compatible additions (minor version), and bug fixes (patch version). The SemVer specification (SemVer 2.0.0, <https://semver.org/>) is well-understood, widely implemented, and provides clear rules for compatibility. P-MCP should define strict rules: major version changes may break wire compatibility; minor versions add optional fields and capabilities; patch versions fix specification ambiguities without changing wire format.
+**Recommendation for PCP**: PCP should adopt semantic versioning rather than date-based versioning. Safety-critical protocols benefit from the explicit communication of breaking changes (major version), backward-compatible additions (minor version), and bug fixes (patch version). The SemVer specification (SemVer 2.0.0, <https://semver.org/>) is well-understood, widely implemented, and provides clear rules for compatibility. PCP should define strict rules: major version changes may break wire compatibility; minor versions add optional fields and capabilities; patch versions fix specification ambiguities without changing wire format.
 
 ### Capability Negotiation
 
@@ -94,7 +94,7 @@ MCP defines a three-phase lifecycle: **initialization** (capability exchange), *
 
 **Fact**: MCP's capability model is simple boolean flags: either a party supports a capability or it does not. There is no versioning within capabilities, no partial capability support, and no capability parameters.
 
-**Analysis**: This simple model works for MCP's use case because capabilities are relatively coarse-grained ("do you support tools?") and there is little variation in how a capability might be implemented. For P-MCP, capability negotiation needs to be more expressive. Safety-critical capabilities such as "shadow validation" or "HNN physics checking" may have multiple implementations, parameter ranges, or quality levels. P-MCP should consider a capability negotiation model that includes:
+**Analysis**: This simple model works for MCP's use case because capabilities are relatively coarse-grained ("do you support tools?") and there is little variation in how a capability might be implemented. For PCP, capability negotiation needs to be more expressive. Safety-critical capabilities such as "shadow validation" or "HNN physics checking" may have multiple implementations, parameter ranges, or quality levels. PCP should consider a capability negotiation model that includes:
 
 1. **Capability version**: What version of a capability is supported
 2. **Capability parameters**: Numerical ranges or enumerations describing capability quality (e.g., physics simulation timestep resolution)
@@ -109,7 +109,7 @@ MCP defines a three-phase lifecycle: **initialization** (capability exchange), *
 
 **Industry consensus**: The "ignore unknown fields" convention (also called "tolerant reader" pattern) is a well-established best practice for JSON-based protocols. It is specified in RFC 7231 for HTTP, used extensively in OpenAPI specifications, and is a core principle of Protocol Buffers' forward compatibility. However, for safety-critical protocols, the "ignore unknown fields" approach has limitations: an unknown field in a safety-critical message might contain critical safety information that an older implementation silently discards.
 
-**Recommendation for P-MCP**: P-MCP should adopt the tolerant reader pattern for non-safety-critical messages but implement a stricter policy for safety-critical messages. Specifically:
+**Recommendation for PCP**: PCP should adopt the tolerant reader pattern for non-safety-critical messages but implement a stricter policy for safety-critical messages. Specifically:
 
 - Non-safety messages: Unknown fields are silently ignored (standard JSON tolerance)
 - Safety-critical messages (lease grants, actuation commands, emergency stops): Unknown fields MUST cause the message to be rejected with a `PROTOCOL_VERSION_MISMATCH` error. This ensures that safety-critical messages are never processed by an implementation that does not fully understand their schema.
@@ -120,15 +120,15 @@ MCP defines a three-phase lifecycle: **initialization** (capability exchange), *
 
 **Fact**: MCP supports three types of messages: requests (with id, expecting response), notifications (no id, no response), and responses. Notifications are used for server-to-client streaming messages (e.g., progress updates, log messages).
 
-**Analysis**: JSON-RPC 2.0 is a reasonable choice for P-MCP's application layer. It is simple, widely implemented, and well-understood. However, P-MCP must address several JSON-RPC limitations:
+**Analysis**: JSON-RPC 2.0 is a reasonable choice for PCP's application layer. It is simple, widely implemented, and well-understood. However, PCP must address several JSON-RPC limitations:
 
-1. **No delivery guarantees**: JSON-RPC over stdio provides reliable ordered delivery, but JSON-RPC over HTTP does not guarantee at-least-once delivery. P-MCP must define transport-level reliability guarantees.
+1. **No delivery guarantees**: JSON-RPC over stdio provides reliable ordered delivery, but JSON-RPC over HTTP does not guarantee at-least-once delivery. PCP must define transport-level reliability guarantees.
 
-2. **No flow control**: JSON-RPC has no built-in flow control mechanism. P-MCP may need application-level flow control for high-frequency state updates.
+2. **No flow control**: JSON-RPC has no built-in flow control mechanism. PCP may need application-level flow control for high-frequency state updates.
 
-3. **No message prioritization**: All JSON-RPC messages are equal. P-MCP must define priority queuing for safety-critical messages (e.g., emergency stops must preempt lease requests).
+3. **No message prioritization**: All JSON-RPC messages are equal. PCP must define priority queuing for safety-critical messages (e.g., emergency stops must preempt lease requests).
 
-4. **Batch mode**: JSON-RPC 2.0 supports batch requests, which could be useful for P-MCP's CRDT state synchronization but adds complexity.
+4. **Batch mode**: JSON-RPC 2.0 supports batch requests, which could be useful for PCP's CRDT state synchronization but adds complexity.
 
 ### Transport Abstraction
 
@@ -136,15 +136,15 @@ MCP defines a three-phase lifecycle: **initialization** (capability exchange), *
 
 **Fact**: The `sse` transport uses HTTP POST for client-to-server messages and Server-Sent Events for server-to-client messages. This asymmetric pattern is designed for the typical LLM use case where the client sends occasional requests and the server streams responses.
 
-**Analysis**: P-MCP's transport requirements are significantly different from MCP's. P-MCP needs:
+**Analysis**: PCP's transport requirements are significantly different from MCP's. PCP needs:
 
 1. **Bidirectional real-time communication**: Robot-to-robot and robot-to-coordinator messages flow in both directions simultaneously. MCP's SSE unidirectional model is insufficient.
 
 2. **Deterministic latency upper bounds**: Safety-critical messages must have guaranteed maximum delivery times. Standard HTTP/SSE cannot provide these guarantees.
 
-3. **Transport-level security**: TEE attestation results must be bound to the transport layer. P-MCP needs mutual TLS with hardware-rooted identity.
+3. **Transport-level security**: TEE attestation results must be bound to the transport layer. PCP needs mutual TLS with hardware-rooted identity.
 
-**Recommendation for P-MCP**: P-MCP should define a transport abstraction layer similar to MCP's but designed for real-time bidirectional communication. The reference transport should be WebSocket with per-message compression, with the abstraction allowing future transports such as QUIC, DDS, or custom real-time middleware. The transport interface should specify: maximum message size, maximum delivery latency (by message priority class), reliability guarantees (at-least-once for safety messages, best-effort for telemetry), and security requirements (mutual TLS with Ed25519-derived certificates).
+**Recommendation for PCP**: PCP should define a transport abstraction layer similar to MCP's but designed for real-time bidirectional communication. The reference transport should be WebSocket with per-message compression, with the abstraction allowing future transports such as QUIC, DDS, or custom real-time middleware. The transport interface should specify: maximum message size, maximum delivery latency (by message priority class), reliability guarantees (at-least-once for safety messages, best-effort for telemetry), and security requirements (mutual TLS with Ed25519-derived certificates).
 
 ### Lifecycle Design
 
@@ -152,7 +152,7 @@ MCP defines a three-phase lifecycle: **initialization** (capability exchange), *
 
 **Fact**: MCP does not define any recovery mechanism for mid-operation failures. If the connection drops during normal operation, there is no specified reconnection handshake, state recovery, or lease reconciliation.
 
-**Analysis**: For P-MCP, lifecycle management is far more critical. A robot losing connection during an actuation sequence could leave physical objects in dangerous states. P-MCP must define:
+**Analysis**: For PCP, lifecycle management is far more critical. A robot losing connection during an actuation sequence could leave physical objects in dangerous states. PCP must define:
 
 1. **Graceful shutdown protocol**: A multi-step process ensuring all physical actuators reach safe states before disconnection
 2. **Abrupt disconnection recovery**: What other robots should do when a peer disconnects without warning
@@ -163,7 +163,7 @@ MCP defines a three-phase lifecycle: **initialization** (capability exchange), *
 
 **Fact**: MCP defines standard JSON-RPC error codes (-32700 to -32603 for parse errors, invalid requests, method not found, invalid params, and internal errors) plus MCP-specific error codes in the -32000 to -32099 range. Custom error codes are defined for specific error conditions.
 
-**Analysis**: MCP's error handling is adequate for its use case but lacks the error classification needed for safety-critical systems. P-MCP should categorize errors into:
+**Analysis**: MCP's error handling is adequate for its use case but lacks the error classification needed for safety-critical systems. PCP should categorize errors into:
 
 - **Recoverable errors**: Temporary conditions that may resolve with retry (e.g., lease temporarily unavailable)
 - **Unrecoverable protocol errors**: Specification violations requiring connection reset (e.g., invalid message format)
@@ -174,7 +174,7 @@ MCP defines a three-phase lifecycle: **initialization** (capability exchange), *
 
 **Fact**: MCP maintains several implicit invariants: (1) messages are valid JSON-RPC 2.0, (2) the `id` field uniquely identifies a request-response pair, (3) notifications never receive responses, (4) the server's capabilities do not change after initialization.
 
-**Recommendation for P-MCP**: P-MCP should define explicit, formally verifiable protocol invariants including:
+**Recommendation for PCP**: PCP should define explicit, formally verifiable protocol invariants including:
 
 1. At most one active lease per resource at any time
 2. No actuation command is executed without a valid lease, constitution pass, and shadow validation
@@ -182,7 +182,7 @@ MCP defines a three-phase lifecycle: **initialization** (capability exchange), *
 4. All safety-critical state transitions are logged in an immutable audit trail
 5. The CRDT state ledger eventually converges to a consistent state across all non-partitioned nodes
 
-### What P-MCP Should Inherit from MCP
+### What PCP Should Inherit from MCP
 
 | Convention | Rationale |
 |-----------|----------|
@@ -193,9 +193,9 @@ MCP defines a three-phase lifecycle: **initialization** (capability exchange), *
 | Clear lifecycle phases (init, operation, shutdown) | Provides structure for state machine design |
 | Reserved namespaces for extensions | Prevents naming collisions in a distributed ecosystem |
 
-### What P-MCP Must Intentionally Diverge From
+### What PCP Must Intentionally Diverge From
 
-| MCP Convention | Reason for Divergence | P-MCP Approach |
+| MCP Convention | Reason for Divergence | PCP Approach |
 |---------------|----------------------|----------------|
 | Date-based versioning | Lacks semantic meaning for breaking vs. non-breaking changes | Semantic versioning (SemVer 2.0.0) |
 | Simple boolean capability flags | Insufficient for safety-critical capability parameters | Versioned capabilities with parameters and interdependencies |
@@ -221,7 +221,7 @@ MCP defines a three-phase lifecycle: **initialization** (capability exchange), *
 
 ### Executive Summary
 
-Industrial robot safety is governed by a comprehensive framework of international standards that define requirements for the entire robot system, including the communication protocol. This section analyzes the protocol-level implications of the key standards: ISO 10218-1/2 (robot safety), ISO/TS 15066 (collaborative robots), IEC 61508 (functional safety of E/E/PE systems), ANSI/RIA R15.06 (US adoption of ISO 10218), IEC 62061 (safety of machinery via SIL), and ISO 13849 (safety of machinery via PL). The central finding is that "safety-rated" communication is not merely a matter of adding error detection or encryption -- it requires deterministic timing, redundancy, formal verification of safety functions, and certified implementation patterns. P-MCP's current Lease-Constitution-Shadow-Actuation pipeline addresses some of these requirements at the application level but does not fully satisfy the protocol-level mandates of these standards.
+Industrial robot safety is governed by a comprehensive framework of international standards that define requirements for the entire robot system, including the communication protocol. This section analyzes the protocol-level implications of the key standards: ISO 10218-1/2 (robot safety), ISO/TS 15066 (collaborative robots), IEC 61508 (functional safety of E/E/PE systems), ANSI/RIA R15.06 (US adoption of ISO 10218), IEC 62061 (safety of machinery via SIL), and ISO 13849 (safety of machinery via PL). The central finding is that "safety-rated" communication is not merely a matter of adding error detection or encryption -- it requires deterministic timing, redundancy, formal verification of safety functions, and certified implementation patterns. PCP's current Lease-Constitution-Shadow-Actuation pipeline addresses some of these requirements at the application level but does not fully satisfy the protocol-level mandates of these standards.
 
 ### Fundamental Concepts
 
@@ -243,9 +243,9 @@ Based on analysis of the standards above, a "safety-rated" communication protoco
 
 **Fact**: OPC-UA Safety (IEC 61784-3-3) specifies maximum communication cycle times depending on the SIL target. For SIL 3, the maximum cycle time is typically 10-20ms. PROFIsafe (IEC 61784-3-3) specifies maximum reaction times that include communication latency, processing time, and actuator response.
 
-**Implication for P-MCP**: P-MCP must specify maximum message delivery latencies for each message class. For safety-critical messages (emergency stops, lease releases, safety-state transitions), the maximum end-to-end latency should be defined and verifiable. The CRDT layer's eventual consistency model must have bounded convergence time for safety-relevant state.
+**Implication for PCP**: PCP must specify maximum message delivery latencies for each message class. For safety-critical messages (emergency stops, lease releases, safety-state transitions), the maximum end-to-end latency should be defined and verifiable. The CRDT layer's eventual consistency model must have bounded convergence time for safety-relevant state.
 
-**P-MCP gap**: The current P-MCP specification does not define any timing constraints. This is a critical gap that must be addressed before the protocol can be considered for safety-rated applications.
+**PCP gap**: The current PCP specification does not define any timing constraints. This is a critical gap that must be addressed before the protocol can be considered for safety-rated applications.
 
 #### Command Authorization and Interlocks
 
@@ -253,9 +253,9 @@ Based on analysis of the standards above, a "safety-rated" communication protoco
 
 **Fact**: IEC 62061 requires that safety communication uses certified communication profiles. The standard references IEC 61784-3 for communication profiles, which define specific mechanisms for error detection (CRC, sequence numbers, watchdog), error reaction (safe state transition), and redundancy.
 
-**Implication for P-MCP**: P-MCP's command authorization model (lease-based access control) is a good application-level mechanism but is not sufficient as a safety-rated interlock. A safety-rated system would require:
+**Implication for PCP**: PCP's command authorization model (lease-based access control) is a good application-level mechanism but is not sufficient as a safety-rated interlock. A safety-rated system would require:
 
-1. A dedicated safety communication channel (possibly using a certified protocol like OPC-UA Safety) that operates independently of the standard P-MCP communication channel
+1. A dedicated safety communication channel (possibly using a certified protocol like OPC-UA Safety) that operates independently of the standard PCP communication channel
 2. Dual-channel validation where safety-critical commands are verified by both the standard channel and the safety channel
 3. Hardware-based interlocks that can override software-based lease authorization
 
@@ -265,7 +265,7 @@ Based on analysis of the standards above, a "safety-rated" communication protoco
 
 **Fact**: IEC 60204-1 requires that emergency stop devices have a mechanical or electrical design that ensures latching (stays activated until deliberately reset) and that resetting the emergency stop does not restart the robot.
 
-**Implication for P-MCP**: P-MCP must define an emergency stop message type that:
+**Implication for PCP**: PCP must define an emergency stop message type that:
 
 1. Has the highest priority in the message queue (preempts all other messages)
 2. Has a guaranteed maximum delivery and processing time
@@ -273,7 +273,7 @@ Based on analysis of the standards above, a "safety-rated" communication protoco
 4. Is acknowledged independently of any other in-flight operations
 5. Does not require a valid lease to be processed (emergency stop must always work, even from unauthorized sources)
 
-**P-MCP gap**: The current Lease-Constitution-Shadow-Actuation pipeline does not include an emergency stop bypass. If a robot requires a valid lease to process any command, an emergency stop from a non-lease-holder would be blocked. This is a critical safety violation.
+**PCP gap**: The current Lease-Constitution-Shadow-Actuation pipeline does not include an emergency stop bypass. If a robot requires a valid lease to process any command, an emergency stop from a non-lease-holder would be blocked. This is a critical safety violation.
 
 #### Safe States and Fail-Safe Transitions
 
@@ -281,7 +281,7 @@ Based on analysis of the standards above, a "safety-rated" communication protoco
 
 **Fact**: ISO 10218-1 Clause 5.5 requires that the robot achieve and maintain a safe state in the event of any single detectable fault. The safe state typically involves stopping all motion, removing power from actuators, and engaging mechanical brakes.
 
-**Implication for P-MCP**: P-MCP must define:
+**Implication for PCP**: PCP must define:
 
 1. A formal safe state for each robot type (not just "stop moving" but a complete specification of joint positions, actuator states, brake engagement, power states)
 2. The maximum time allowed to reach the safe state from any operational state
@@ -294,14 +294,14 @@ Based on analysis of the standards above, a "safety-rated" communication protoco
 
 **Fact**: PROFIsafe uses a "monitoring window" concept with a toggle bit and a watchdog timer. Each safety message includes a sequence number and a toggle bit. The receiver monitors for message loss, duplication, delay, and corruption. If any of these conditions are detected, the safety function transitions to a safe state.
 
-**Implication for P-MCP**: P-MCP must define:
+**Implication for PCP**: PCP must define:
 
 1. A heartbeat protocol with specified intervals for each operational mode
 2. Watchdog timeout values for each message class
 3. The behavior when a heartbeat is missed (safe-state transition)
 4. Graceful degradation when heartbeats are intermittently delayed but not lost
 
-**P-MCP gap**: While the lease mechanism provides a form of expiration-based safety (the lease expires if the holder fails to renew), there is no continuous heartbeat monitoring. A robot could lose communication while holding a valid lease, and the lease would not expire until its TTL. During that time, other robots would be unable to acquire the lease, potentially creating a deadlock or unsafe situation.
+**PCP gap**: While the lease mechanism provides a form of expiration-based safety (the lease expires if the holder fails to renew), there is no continuous heartbeat monitoring. A robot could lose communication while holding a valid lease, and the lease would not expire until its TTL. During that time, other robots would be unable to acquire the lease, potentially creating a deadlock or unsafe situation.
 
 #### Redundancy and Diagnostic Coverage
 
@@ -309,7 +309,7 @@ Based on analysis of the standards above, a "safety-rated" communication protoco
 
 **Fact**: IEC 61784-3 safety communication profiles achieve redundancy through various means: dual-channel communication (sending the same message on two independent channels), CRC with sufficient bit coverage, sequence numbering to detect loss and duplication, and timeout monitoring to detect delays.
 
-**Implication for P-MCP**: P-MCP's CRDT-based state ledger provides natural redundancy for state data (multiple replicas), but CRDTs do not provide the type of redundancy required by IEC 61508. Safety communication redundancy requires independent, diverse channels that can detect common-cause failures. P-MCP should consider:
+**Implication for PCP**: PCP's CRDT-based state ledger provides natural redundancy for state data (multiple replicas), but CRDTs do not provide the type of redundancy required by IEC 61508. Safety communication redundancy requires independent, diverse channels that can detect common-cause failures. PCP should consider:
 
 1. A separate safety channel (e.g., OPC-UA Safety over a different physical network) for safety-critical commands
 2. Dual-channel validation where the CRDT state and a separate safety state must agree before actuation
@@ -317,7 +317,7 @@ Based on analysis of the standards above, a "safety-rated" communication protoco
 
 ### Assessment of the Lease-Constitution-Shadow-Actuation Pipeline
 
-| Stage | Standards Requirement | P-MCP Coverage | Gap | Severity |
+| Stage | Standards Requirement | PCP Coverage | Gap | Severity |
 |-------|----------------------|----------------|-----|----------|
 | Lease Acquisition | Authorization, access control | Partially addressed | No SIL classification of lease mechanism | Medium |
 | Constitution Validation | Safety rule verification | Partially addressed | No formal specification of constitution rules, no certification path | High |
@@ -334,7 +334,7 @@ Based on analysis of the standards above, a "safety-rated" communication protoco
 
 **Fact**: IEC 61508 requires that the safety function degrades to a safe state upon detection of a communication fault. The time to detect the fault (via watchdog timeout) plus the time to reach the safe state must be within the overall safety response time budget.
 
-**Implication for P-MCP**: P-MCP must define a comprehensive communication loss recovery protocol:
+**Implication for PCP**: PCP must define a comprehensive communication loss recovery protocol:
 
 1. Detection: Heartbeat timeout (watchdog) triggers communication fault
 2. Immediate response: All actuation commands are suspended
@@ -346,18 +346,18 @@ Based on analysis of the standards above, a "safety-rated" communication protoco
 
 ### Standards Comparison Matrix
 
-| Standard | Scope | Key Protocol Requirement | SIL/PL Target | Applicability to P-MCP |
+| Standard | Scope | Key Protocol Requirement | SIL/PL Target | Applicability to PCP |
 |----------|-------|------------------------|---------------|----------------------|
 | ISO 10218-1 | Robot safety (manufacturer) | Safe-state on single fault, E-stop, safety-rated control | References IEC 61508/ISO 13849 | High - defines robot-level safety requirements |
 | ISO 10218-2 | Robot system safety (integrator) | Communication fault behavior, workspace safety | References IEC 61508/ISO 13849 | High - defines system-level communication requirements |
-| ISO/TS 15066 | Collaborative robots | Force/velocity limits, separation monitoring | PL d typically | Medium - if P-MCP targets collaborative robots |
+| ISO/TS 15066 | Collaborative robots | Force/velocity limits, separation monitoring | PL d typically | Medium - if PCP targets collaborative robots |
 | IEC 61508 | Functional safety (generic) | SIL classification, PFD/PFH budgets, diagnostic coverage | SIL 1-4 | Critical - foundational standard for safety communication |
 | ANSI/RIA R15.06 | US adoption of ISO 10218 | Same as ISO 10218-1/2 | Same | High - for US market compliance |
 | IEC 62061 | Safety of machinery | SIL assignment, safety communication requirements | SIL 1-3 | High - machinery safety communication profiles |
 | ISO 13849 | Safety of machinery (PL) | Performance Level classification, Category (B, 1, 2, 3, 4) | PL a-e | Medium - alternative to IEC 62061 for lower SIL |
 | IEC 61784-3 | Safety communication profiles | Certified communication patterns (PROFIsafe, EtherCAT Safety, etc.) | Per profile | Critical - defines specific communication mechanisms |
 
-### Recommendations Specifically for P-MCP
+### Recommendations Specifically for PCP
 
 1. **Define safety targets explicitly**: Before designing the protocol, specify the target SIL or PL for the communication channel. This drives all other design decisions. For most robotics applications, SIL 2 is a practical target that balances safety with implementation complexity.
 
@@ -391,7 +391,7 @@ Based on analysis of the standards above, a "safety-rated" communication protoco
 
 ### Executive Summary
 
-This section analyzes how existing robotics protocols solve the coordination, safety, and communication problems that P-MCP addresses. Each protocol provides valuable lessons: ROS 2 (DDS) demonstrates QoS-driven middleware with lifecycle management; MAVLink shows pragmatic command sequencing with robust failsafe mechanisms; OPC-UA Safety represents the gold standard for certified safety communication; and fieldbus safety protocols (EtherCAT Safety, PROFIsafe) demonstrate how to achieve deterministic safety communication over standard physical layers. The analysis reveals that P-MCP's architecture draws inspiration from multiple sources but does not fully replicate the safety mechanisms of any single existing protocol. The most significant finding is that P-MCP's CRDT-based approach is unique among safety-critical robotics protocols -- no existing safety-rated protocol uses CRDTs for safety state management, which should prompt careful justification.
+This section analyzes how existing robotics protocols solve the coordination, safety, and communication problems that PCP addresses. Each protocol provides valuable lessons: ROS 2 (DDS) demonstrates QoS-driven middleware with lifecycle management; MAVLink shows pragmatic command sequencing with robust failsafe mechanisms; OPC-UA Safety represents the gold standard for certified safety communication; and fieldbus safety protocols (EtherCAT Safety, PROFIsafe) demonstrate how to achieve deterministic safety communication over standard physical layers. The analysis reveals that PCP's architecture draws inspiration from multiple sources but does not fully replicate the safety mechanisms of any single existing protocol. The most significant finding is that PCP's CRDT-based approach is unique among safety-critical robotics protocols -- no existing safety-rated protocol uses CRDTs for safety state management, which should prompt careful justification.
 
 ### ROS 2 (Data Distribution Service)
 
@@ -403,15 +403,15 @@ This section analyzes how existing robotics protocols solve the coordination, sa
 
 **Fact**: ROS 2 lifecycle nodes implement a state machine with states: Unconfigured, Inactive, Active, and Finalized. Transitions between states are triggered by lifecycle service calls (configure, activate, deactivate, cleanup, shutdown). This provides structured initialization and shutdown behavior.
 
-#### Relevance to P-MCP
+#### Relevance to PCP
 
-| ROS 2 Feature | P-MCP Equivalent | Assessment |
+| ROS 2 Feature | PCP Equivalent | Assessment |
 |---------------|-----------------|------------|
-| DDS QoS policies | (None defined) | P-MCP should define equivalent QoS: reliability, deadline, and liveliness for each message type |
-| Lifecycle nodes | (Partial - init/shutdown) | P-MCP should adopt lifecycle state machines for robot nodes, including transition validation |
-| DDS discovery | Ed25519 identity + TEE attestation | P-MCP's identity model is stronger than DDS discovery but does not include automatic peer discovery |
-| ROS 2 parameters | (None defined) | P-MCP should define a parameter/configuration mechanism for runtime configuration |
-| ROS 2 actions (long-running tasks) | Lease mechanism | P-MCP's lease is conceptually similar but lacks the goal feedback and cancellation semantics of ROS 2 actions |
+| DDS QoS policies | (None defined) | PCP should define equivalent QoS: reliability, deadline, and liveliness for each message type |
+| Lifecycle nodes | (Partial - init/shutdown) | PCP should adopt lifecycle state machines for robot nodes, including transition validation |
+| DDS discovery | Ed25519 identity + TEE attestation | PCP's identity model is stronger than DDS discovery but does not include automatic peer discovery |
+| ROS 2 parameters | (None defined) | PCP should define a parameter/configuration mechanism for runtime configuration |
+| ROS 2 actions (long-running tasks) | Lease mechanism | PCP's lease is conceptually similar but lacks the goal feedback and cancellation semantics of ROS 2 actions |
 
 #### Safety Extensions
 
@@ -421,13 +421,13 @@ This section analyzes how existing robotics protocols solve the coordination, sa
 
 - **SafeROS** (Academic): A research project that wraps ROS 2 communication in safety-enforcing middleware, adding message authentication, integrity checking, and timing guarantees.
 
-**Analysis**: The absence of a standardized safety layer in ROS 2 is a significant limitation for industrial deployment. P-MCP has an opportunity to fill this gap by defining a safety layer that could potentially integrate with ROS 2's DDS middleware. However, P-MCP must be careful not to assume ROS 2 as a dependency -- the protocol should be middleware-agnostic.
+**Analysis**: The absence of a standardized safety layer in ROS 2 is a significant limitation for industrial deployment. PCP has an opportunity to fill this gap by defining a safety layer that could potentially integrate with ROS 2's DDS middleware. However, PCP must be careful not to assume ROS 2 as a dependency -- the protocol should be middleware-agnostic.
 
 #### Deterministic Execution
 
 **Fact**: Standard DDS does not guarantee deterministic message delivery. The DDS specification defines maximum latencies only as QoS policies that the application can request, but there is no guarantee that the middleware will meet them. Real-time DDS implementations (e.g., Connext DDS Micro, Fast DDS with real-time configuration) can provide bounded latencies on real-time operating systems, but this requires careful system-level configuration.
 
-**Implication for P-MCP**: P-MCP cannot rely on underlying transport determinism. The protocol must implement its own timing guarantees, including application-level watchdogs and timeout handling, regardless of the transport layer's behavior.
+**Implication for PCP**: PCP cannot rely on underlying transport determinism. The protocol must implement its own timing guarantees, including application-level watchdogs and timeout handling, regardless of the transport layer's behavior.
 
 ### MAVLink
 
@@ -439,24 +439,24 @@ This section analyzes how existing robotics protocols solve the coordination, sa
 
 **Fact**: MAVLink defines an arming/disarming mechanism for the vehicle's propulsion system. Arming is a prerequisite for most actuation commands and involves multiple pre-arm safety checks (IMU calibration, GPS lock, geofence compliance, battery level). Disarming can be triggered by various failsafe conditions.
 
-#### Relevance to P-MCP
+#### Relevance to PCP
 
-MAVLink's design is the closest analog to P-MCP's actuation pipeline. The arming/disarming paradigm maps directly to P-MCP's lease concept: the vehicle must be "armed" (hold a lease) before it can execute actuation commands. The pre-arm checks map to P-MCP's constitution validation.
+MAVLink's design is the closest analog to PCP's actuation pipeline. The arming/disarming paradigm maps directly to PCP's lease concept: the vehicle must be "armed" (hold a lease) before it can execute actuation commands. The pre-arm checks map to PCP's constitution validation.
 
-| MAVLink Feature | P-MCP Equivalent | Assessment |
+| MAVLink Feature | PCP Equivalent | Assessment |
 |----------------|-----------------|------------|
-| Arming/Disarming | Lease Acquisition | P-MCP should adopt MAVLink's pre-condition checks before lease grant |
-| COMMAND_ACK | (Not defined) | P-MCP MUST define explicit acknowledgements for all safety-critical commands |
-| Sequence numbers | (Not defined in CRDT) | P-MCP should add sequence numbers for actuation commands to detect loss and reordering |
-| Failsafe triggers | (Partial - lease TTL) | P-MCP should define multiple failsafe triggers (heartbeat loss, communication loss, battery low, etc.) |
-| Heartbeat messages | (Not defined) | P-MCP MUST add heartbeat messages as required by safety standards |
-| System/Component IDs | Ed25519 identity | P-MCP's cryptographic identity is stronger but more complex |
+| Arming/Disarming | Lease Acquisition | PCP should adopt MAVLink's pre-condition checks before lease grant |
+| COMMAND_ACK | (Not defined) | PCP MUST define explicit acknowledgements for all safety-critical commands |
+| Sequence numbers | (Not defined in CRDT) | PCP should add sequence numbers for actuation commands to detect loss and reordering |
+| Failsafe triggers | (Partial - lease TTL) | PCP should define multiple failsafe triggers (heartbeat loss, communication loss, battery low, etc.) |
+| Heartbeat messages | (Not defined) | PCP MUST add heartbeat messages as required by safety standards |
+| System/Component IDs | Ed25519 identity | PCP's cryptographic identity is stronger but more complex |
 
 #### Failsafe Mechanisms
 
 **Fact**: MAVLink defines multiple failsafe triggers: heartbeat loss (communication timeout), geofence breach, low battery, GPS loss, attitude anomaly, and manual RC signal loss. Each failsafe trigger has a configurable action (land, return to launch, loiter, terminate).
 
-**Analysis**: MAVLink's failsafe design is pragmatic and battle-tested in production unmanned vehicles. P-MCP should adopt a similar multi-trigger failsafe model. The key lesson is that failsafe triggers should be configurable per deployment (different environments have different risk profiles) but the mechanism for detecting and responding to triggers should be standardized.
+**Analysis**: MAVLink's failsafe design is pragmatic and battle-tested in production unmanned vehicles. PCP should adopt a similar multi-trigger failsafe model. The key lesson is that failsafe triggers should be configurable per deployment (different environments have different risk profiles) but the mechanism for detecting and responding to triggers should be standardized.
 
 ### OPC-UA Safety
 
@@ -475,17 +475,17 @@ MAVLink's design is the closest analog to P-MCP's actuation pipeline. The arming
 
 **Fact**: OPC-UA Safety is a certified communication profile per IEC 61784-3. This means it has been formally verified to achieve specific SIL targets when implemented according to the specification. The certification covers the communication protocol itself, not the entire safety function (which includes sensors, logic, and actuators).
 
-#### Relevance to P-MCP
+#### Relevance to PCP
 
-OPC-UA Safety represents the most comprehensive approach to safety communication among the protocols analyzed. P-MCP should study its mechanisms closely:
+OPC-UA Safety represents the most comprehensive approach to safety communication among the protocols analyzed. PCP should study its mechanisms closely:
 
-| OPC-UA Safety Feature | P-MCP Coverage | Gap |
+| OPC-UA Safety Feature | PCP Coverage | Gap |
 |----------------------|----------------|-----|
 | Dual-channel redundancy | Single CRDT channel | Critical - no independent safety channel |
 | Sequence numbers + toggle bit | Not defined | High - cannot detect message loss or reordering |
 | CRC with safety bit coverage | Not defined (JSON-RPC does not include CRC) | High - JSON transport does not provide integrity at this level |
 | Watchdog with configurable timeout | Not defined | Critical - no heartbeat monitoring |
-| Safety token (dynamic authentication) | Ed25519 signatures (static per message) | Medium - P-MCP has authentication but not a lightweight per-message safety token |
+| Safety token (dynamic authentication) | Ed25519 signatures (static per message) | Medium - PCP has authentication but not a lightweight per-message safety token |
 | Timestamping for delay detection | Not defined | Medium - no timing verification |
 | Certified SIL rating | Not certified | Critical - no certification path defined |
 
@@ -497,7 +497,7 @@ OPC-UA Safety represents the most comprehensive approach to safety communication
 
 **Fact**: EtherCAT Safety achieves SIL 3 certification. The protocol is designed for cycle times as low as 1ms, making it suitable for high-speed motion control safety applications.
 
-**Analysis**: EtherCAT Safety's approach of adding a safety container to standard communication frames is analogous to what P-MCP could do with its JSON-RPC messages. A P-MCP safety container could include: CRC, sequence number, timestamp, and a safety token. However, P-MCP's JSON-based format makes binary CRC less natural than in EtherCAT's binary protocol.
+**Analysis**: EtherCAT Safety's approach of adding a safety container to standard communication frames is analogous to what PCP could do with its JSON-RPC messages. A PCP safety container could include: CRC, sequence number, timestamp, and a safety token. However, PCP's JSON-based format makes binary CRC less natural than in EtherCAT's binary protocol.
 
 #### PROFIsafe
 
@@ -505,19 +505,19 @@ OPC-UA Safety represents the most comprehensive approach to safety communication
 
 **Fact**: PROFIsafe's "black channel" principle states that the safety protocol should not depend on the underlying communication channel's properties. The safety mechanisms (CRC, sequence numbers, watchdog) must work correctly regardless of whether the underlying channel is PROFIBUS, PROFINET, or even a wireless link. This is achieved by including all safety-relevant information in the safety container.
 
-**Analysis**: The black channel principle is highly relevant to P-MCP. P-MCP's transport abstraction should follow this principle: the safety mechanisms (sequence numbers, CRC, watchdog) should be part of the P-MCP protocol layer, not dependent on specific transport features. This allows P-MCP to work over any transport (WebSocket, DDS, QUIC, etc.) while maintaining safety guarantees.
+**Analysis**: The black channel principle is highly relevant to PCP. PCP's transport abstraction should follow this principle: the safety mechanisms (sequence numbers, CRC, watchdog) should be part of the PCP protocol layer, not dependent on specific transport features. This allows PCP to work over any transport (WebSocket, DDS, QUIC, etc.) while maintaining safety guarantees.
 
 #### Eclipse Zenoh
 
 **Fact**: Eclipse Zenoh is a pub/sub/query protocol designed for edge-to-cloud communication in IoT and robotics. It provides a unified communication model that supports local (shared memory), mesh (peer-to-peer), and routed (client-broker) communication. Zenoh supports configurable reliability, congestion control, and compression.
 
-**Analysis**: Zenoh's flexibility makes it an interesting potential transport for P-MCP. Its support for both pub/sub and query paradigms could map well to P-MCP's state dissemination (pub/sub for CRDT updates) and command patterns (query/response for lease requests). However, Zenoh does not include built-in safety mechanisms and is not safety-certified.
+**Analysis**: Zenoh's flexibility makes it an interesting potential transport for PCP. Its support for both pub/sub and query paradigms could map well to PCP's state dissemination (pub/sub for CRDT updates) and command patterns (query/response for lease requests). However, Zenoh does not include built-in safety mechanisms and is not safety-certified.
 
 #### Open-RMF
 
 **Fact**: Open-RMF (Robotics Middleware Framework) is an open-source framework for managing heterogeneous robot fleets. It provides fleet management, traffic management, and task orchestration. Open-RMF is built on ROS 2 and uses DDS for communication.
 
-**Analysis**: Open-RMF addresses a higher level of abstraction than P-MCP (fleet management vs. protocol design). P-MCP could potentially be used as the underlying safety-critical communication protocol for an Open-RMF deployment. However, Open-RMF's current architecture does not include the safety mechanisms that P-MCP provides.
+**Analysis**: Open-RMF addresses a higher level of abstraction than PCP (fleet management vs. protocol design). PCP could potentially be used as the underlying safety-critical communication protocol for an Open-RMF deployment. However, Open-RMF's current architecture does not include the safety mechanisms that PCP provides.
 
 ### TEE-Attested Robot Identity
 
@@ -527,9 +527,9 @@ OPC-UA Safety represents the most comprehensive approach to safety communication
 
 **Fact**: SGX attestation is a two-step process: local attestation (between enclaves on the same platform) and remote attestation (between an enclave and a remote verifier). Remote attestation requires an Intel-provided attestation service (IAS or the newer Data Center Attestation Primitives, DCAP).
 
-**Analysis**: SGX's attestation model is relevant to P-MCP's TEE attestation layer. However, SGX has known limitations: side-channel attacks (Spectre, Meltdown, and SGX-specific attacks like Foreshadow), limited enclave memory (typically 128MB), and vendor lock-in to Intel platforms.
+**Analysis**: SGX's attestation model is relevant to PCP's TEE attestation layer. However, SGX has known limitations: side-channel attacks (Spectre, Meltdown, and SGX-specific attacks like Foreshadow), limited enclave memory (typically 128MB), and vendor lock-in to Intel platforms.
 
-**Implication for P-MCP**: P-MCP should support multiple TEE platforms (SGX, SEV, TrustZone) rather than being tied to a single vendor. The attestation protocol should be abstract enough to accommodate different TEE mechanisms while providing equivalent security guarantees.
+**Implication for PCP**: PCP should support multiple TEE platforms (SGX, SEV, TrustZone) rather than being tied to a single vendor. The attestation protocol should be abstract enough to accommodate different TEE mechanisms while providing equivalent security guarantees.
 
 #### AMD SEV
 
@@ -549,11 +549,11 @@ OPC-UA Safety represents the most comprehensive approach to safety communication
 
 **Fact**: DICE (Device Identifier Composition Engine, specified in the TCG DICE specification) is a lightweight hardware root of trust that generates compound device identities from the hardware and firmware measurements. DICE is designed for embedded and IoT devices and is lighter weight than a full TPM.
 
-**Analysis**: For robotics, DICE is likely the most practical hardware root of trust. It is lightweight, does not require a dedicated security chip, and can be integrated into the robot's boot process. P-MCP's Ed25519 identity should be derived from a DICE-generated key pair, binding the cryptographic identity to the hardware and firmware state.
+**Analysis**: For robotics, DICE is likely the most practical hardware root of trust. It is lightweight, does not require a dedicated security chip, and can be integrated into the robot's boot process. PCP's Ed25519 identity should be derived from a DICE-generated key pair, binding the cryptographic identity to the hardware and firmware state.
 
 ### Protocol Feature Comparison Matrix
 
-| Feature | P-MCP | ROS 2/DDS | MAVLink | OPC-UA Safety | PROFIsafe | EtherCAT Safety |
+| Feature | PCP | ROS 2/DDS | MAVLink | OPC-UA Safety | PROFIsafe | EtherCAT Safety |
 |---------|-------|-----------|---------|---------------|-----------|----------------|
 | Transport | JSON-RPC (planned) | DDS (TCP/UDP) | Serial/UDP | OPC-UA (TCP) | PROFINET/PROFIBUS | EtherCAT |
 | Identity | Ed25519 + TEE | DDS participant | System/Component ID | X.509 certificate | Device ID | Device ID |
@@ -569,17 +569,17 @@ OPC-UA Safety represents the most comprehensive approach to safety communication
 | Physics validation | HNN (planned) | (None) | (None) | (None) | (None) | (None) |
 | Formal spec | No | No | No | Partial | Yes | Yes |
 
-### Recommendations Specifically for P-MCP
+### Recommendations Specifically for PCP
 
 1. **Adopt MAVLink's acknowledgement model**: Every safety-critical command MUST receive an explicit acknowledgement. The acknowledgement should include the command's result (accepted, rejected, timeout) and a reference to the original command (sequence number or idempotency key).
 
-2. **Adopt PROFIsafe's black channel principle**: All safety mechanisms should be part of the P-MCP protocol layer, not dependent on specific transport features. This enables P-MCP to work over any transport while maintaining safety guarantees.
+2. **Adopt PROFIsafe's black channel principle**: All safety mechanisms should be part of the PCP protocol layer, not dependent on specific transport features. This enables PCP to work over any transport while maintaining safety guarantees.
 
-3. **Study OPC-UA Safety's dual-channel approach**: While full dual-channel redundancy may be overkill for initial P-MCP deployments, the protocol should be designed to support it. The safety container concept (CRC, sequence number, watchdog, safety token) should be defined as a protocol-level feature that can operate over any transport.
+3. **Study OPC-UA Safety's dual-channel approach**: While full dual-channel redundancy may be overkill for initial PCP deployments, the protocol should be designed to support it. The safety container concept (CRC, sequence number, watchdog, safety token) should be defined as a protocol-level feature that can operate over any transport.
 
 4. **Add heartbeat and watchdog mechanisms**: These are non-negotiable for safety-rated communication. The heartbeat protocol should be lightweight (small messages at regular intervals) and the watchdog should trigger safe-state transition on timeout.
 
-5. **Support multi-vendor TEE attestation**: P-MCP should abstract the TEE attestation to support SGX, SEV, TrustZone, TPM, and DICE. The attestation protocol should verify: hardware authenticity, firmware integrity, and code identity.
+5. **Support multi-vendor TEE attestation**: PCP should abstract the TEE attestation to support SGX, SEV, TrustZone, TPM, and DICE. The attestation protocol should verify: hardware authenticity, firmware integrity, and code identity.
 
 ### References
 
@@ -604,7 +604,7 @@ OPC-UA Safety represents the most comprehensive approach to safety communication
 
 ### Executive Summary
 
-Schema-first protocol design is the practice of defining the canonical data model using a formal schema language before writing any implementation code. This approach ensures type safety, enables automated code generation, and provides a single source of truth for the protocol's wire format. This section analyzes the available schema technologies, serialization formats, and tooling ecosystems, and provides specific recommendations for P-MCP's schema strategy.
+Schema-first protocol design is the practice of defining the canonical data model using a formal schema language before writing any implementation code. This approach ensures type safety, enables automated code generation, and provides a single source of truth for the protocol's wire format. This section analyzes the available schema technologies, serialization formats, and tooling ecosystems, and provides specific recommendations for PCP's schema strategy.
 
 ### Fundamental Concepts
 
@@ -614,7 +614,7 @@ Schema-first protocol design is the practice of defining the canonical data mode
 
 **Fact**: OpenAPI 3.1 (OAS 3.1) is fully aligned with JSON Schema Draft 2020-12, using it as the schema description format for request and response bodies. OpenAPI adds API-specific metadata (paths, operations, parameters, security requirements) on top of the JSON Schema foundation.
 
-**Fact**: AsyncAPI 2.6 provides an OpenAPI-like specification for asynchronous message-driven APIs. It is particularly relevant to P-MCP because robot communication is inherently event-driven (state updates, command responses, heartbeat messages).
+**Fact**: AsyncAPI 2.6 provides an OpenAPI-like specification for asynchronous message-driven APIs. It is particularly relevant to PCP because robot communication is inherently event-driven (state updates, command responses, heartbeat messages).
 
 ### Serialization Format Comparison
 
@@ -627,7 +627,7 @@ Schema-first protocol design is the practice of defining the canonical data mode
 | CBOR + CDDL | CDDL | Binary | Good | Poor | Low | No | Small |
 | MessagePack | (None standard) | Binary | Limited | No | Low | No | Small |
 
-**Analysis**: For P-MCP, JSON Schema with JSON wire format is the correct choice for the application protocol layer (JSON-RPC messages). The reasons are:
+**Analysis**: For PCP, JSON Schema with JSON wire format is the correct choice for the application protocol layer (JSON-RPC messages). The reasons are:
 
 1. **Debuggability**: Safety-critical systems require extensive logging and debugging. JSON is human-readable, which is essential for post-incident analysis and regulatory review.
 
@@ -635,9 +635,9 @@ Schema-first protocol design is the practice of defining the canonical data mode
 
 3. **Tooling maturity**: JSON Schema validation (AJV), code generation (quicktype, datamodel-code-generator), and documentation generation are mature and well-maintained.
 
-4. **Compatibility with MCP**: Since P-MCP is inspired by MCP, using the same schema format (JSON Schema) facilitates cross-referencing and potential future interoperability.
+4. **Compatibility with MCP**: Since PCP is inspired by MCP, using the same schema format (JSON Schema) facilitates cross-referencing and potential future interoperability.
 
-However, P-MCP should consider a binary serialization format for high-frequency messages (CRDT state updates, heartbeat messages, physics simulation data). Protocol Buffers or FlatBuffers would be appropriate for these messages. The protocol should define a content-type mechanism that allows different serialization formats for different message types.
+However, PCP should consider a binary serialization format for high-frequency messages (CRDT state updates, heartbeat messages, physics simulation data). Protocol Buffers or FlatBuffers would be appropriate for these messages. The protocol should define a content-type mechanism that allows different serialization formats for different message types.
 
 ### Semantic Versioning for Schemas
 
@@ -649,11 +649,11 @@ However, P-MCP should consider a binary serialization format for high-frequency 
 - **MINOR**: Add new optional properties (with `additionalProperties` remaining open or `true`), add new enum values (if existing implementations ignore unknown values), add new `oneOf`/`anyOf` branches, relax constraints (increase `maxLength`, decrease `minLength`). Existing valid documents remain valid.
 - **MAJOR**: Remove or rename properties, change property types, add new required properties, tighten constraints (decrease `maxLength`, increase `minLength`), remove enum values.
 
-**Recommendation for P-MCP**: Adopt these semantic versioning rules for the P-MCP schema. Enforce them through automated CI/CD checks that compare the new schema against the previous version and verify that only PATCH or MINOR changes are made within a major version.
+**Recommendation for PCP**: Adopt these semantic versioning rules for the PCP schema. Enforce them through automated CI/CD checks that compare the new schema against the previous version and verify that only PATCH or MINOR changes are made within a major version.
 
 ### Schema Organization
 
-**Recommendation**: P-MCP should organize its schema following Anthropic MCP's pattern, with some modifications:
+**Recommendation**: PCP should organize its schema following Anthropic MCP's pattern, with some modifications:
 
 ```
 ppcp-schema/
@@ -692,7 +692,7 @@ The `schema.ts` file is the single source of truth. All other artifacts (JSON Sc
 | jsonschema (Python) | Python | JSON Schema validation | Production-ready |
 | quicktype | CLI | Schema inference from JSON, cross-language code generation | Production-ready |
 
-**Recommendation for P-MCP**:
+**Recommendation for PCP**:
 
 - **Runtime validation**: AJV for TypeScript/JavaScript implementations, pydantic for Python implementations
 - **Schema definition**: Define schemas in JSON Schema Draft 2020-12 directly (not generated from code). This ensures the JSON Schema is the canonical source of truth.
@@ -715,7 +715,7 @@ Canonical JSON Schema (schema.json)
 
 #### Conformance Testing Strategy
 
-**Recommendation**: P-MCP should implement a three-level conformance testing strategy:
+**Recommendation**: PCP should implement a three-level conformance testing strategy:
 
 1. **Schema validation tests**: Verify that all generated messages conform to the JSON Schema. These tests use AJV (or equivalent) to validate example messages against the schema. Run on every commit.
 
@@ -727,7 +727,7 @@ Canonical JSON Schema (schema.json)
 
 **Fact**: JSON Schema's `discriminator` keyword (supported in OpenAPI 3.x and some JSON Schema implementations) enables discriminated union types, where a specific property's value determines which schema variant applies.
 
-**Recommendation for P-MCP**: P-MCP should use discriminated unions extensively for command and response types. For example:
+**Recommendation for PCP**: PCP should use discriminated unions extensively for command and response types. For example:
 
 ```json
 {
@@ -743,7 +743,7 @@ Canonical JSON Schema (schema.json)
 
 This enables efficient dispatch and validation: the receiver reads the `type` field first, then validates against the specific schema variant. This is both safer (no ambiguity) and faster (no need to try all `oneOf` branches).
 
-### Recommendations Specifically for P-MCP
+### Recommendations Specifically for PCP
 
 1. **Use JSON Schema Draft 2020-12 as the canonical schema format**: It is well-specified, widely supported, and aligned with OpenAPI 3.1 and MCP's approach.
 
@@ -807,7 +807,7 @@ Conflict-free Replicated Data Types (CRDTs) are data structures designed for dis
 
 3. **Gomes et al. (2017)**, "Making Operation-Based CRDTs Conflict-Free," Programming Journal: Discusses methods for ensuring operation commutativity but does not address real-time constraints.
 
-**Opinion**: The academic literature on CRDTs has not seriously addressed their applicability to safety-critical physical systems. The research community's focus has been on correctness (convergence, conflict resolution) rather than timing (bounded latency, real-time constraints). This gap in the literature is itself a cautionary signal for P-MCP's use of CRDTs.
+**Opinion**: The academic literature on CRDTs has not seriously addressed their applicability to safety-critical physical systems. The research community's focus has been on correctness (convergence, conflict resolution) rather than timing (bounded latency, real-time constraints). This gap in the literature is itself a cautionary signal for PCP's use of CRDTs.
 
 #### Production Implementations
 
@@ -831,7 +831,7 @@ Conflict-free Replicated Data Types (CRDTs) are data structures designed for dis
 
 **Fact**: The convergence time of a CRDT depends on the network latency between replicas. In a system with N replicas connected by a network with maximum latency L, the worst-case convergence time is (N-1) * L for state-based CRDTs (because state changes must propagate through all replicas). For operation-based CRDTs, the worst-case convergence time is L (assuming reliable broadcast).
 
-**Implication for P-MCP**: If P-MCP uses CRDTs for lease state, a robot might read a stale CRDT state and believe a resource is available when another robot has already acquired the lease (but the update hasn't propagated yet). This could lead to two robots attempting to actuate the same resource simultaneously.
+**Implication for PCP**: If PCP uses CRDTs for lease state, a robot might read a stale CRDT state and believe a resource is available when another robot has already acquired the lease (but the update hasn't propagated yet). This could lead to two robots attempting to actuate the same resource simultaneously.
 
 **Severity**: This is a **critical safety hazard**. Two robots acting on the same physical resource could cause collisions, equipment damage, or personnel injury.
 
@@ -839,7 +839,7 @@ Conflict-free Replicated Data Types (CRDTs) are data structures designed for dis
 
 **Fact**: In a network partition, CRDT replicas on different sides of the partition continue to accept updates independently. When the partition heals, the CRDT merge operation resolves conflicts. However, during the partition, each side may have made decisions based on its local state that are inconsistent with the other side's decisions.
 
-**Implication for P-MCP**: If P-MCP uses CRDTs for lease management, a network partition could allow two robots on different sides of the partition to acquire the same lease independently. The CRDT would resolve the conflict when the partition heals, but by then, physical damage may have already occurred.
+**Implication for PCP**: If PCP uses CRDTs for lease management, a network partition could allow two robots on different sides of the partition to acquire the same lease independently. The CRDT would resolve the conflict when the partition heals, but by then, physical damage may have already occurred.
 
 **Severity**: This is a **critical safety hazard**. The entire purpose of the lease mechanism is to prevent simultaneous access to shared resources. CRDTs cannot guarantee this during network partitions.
 
@@ -847,7 +847,7 @@ Conflict-free Replicated Data Types (CRDTs) are data structures designed for dis
 
 **Fact**: CRDTs resolve conflicts through deterministic rules (e.g., last-writer-wins based on timestamps, or remove-wins for sets). These rules are designed for data convergence, not for mutual exclusion.
 
-**Implication for P-MCP**: If two robots simultaneously attempt to acquire a lease using CRDT-based state, the CRDT's conflict resolution rule might grant the lease to both (if the resolution rule is based on local timestamps that appear concurrent) or grant it to one and silently discard the other (if using last-writer-wins). In either case, the losing robot may not be notified that its lease request was denied.
+**Implication for PCP**: If two robots simultaneously attempt to acquire a lease using CRDT-based state, the CRDT's conflict resolution rule might grant the lease to both (if the resolution rule is based on local timestamps that appear concurrent) or grant it to one and silently discard the other (if using last-writer-wins). In either case, the losing robot may not be notified that its lease request was denied.
 
 **Severity**: This is a **critical safety hazard**. Lease acquisition must be an atomic operation with a definitive result (granted or denied). CRDTs do not provide atomic operations.
 
@@ -871,7 +871,7 @@ Given the fundamental incompatibility of pure CRDTs with safety-critical mutual 
 
 **Fact**: Escrow CRDTs (recently proposed by researchers including B. L. Ongaro's group and others) are a variant that supports operations that can be denied if they would violate a constraint (e.g., allocating from a shared pool where the total allocation cannot exceed the pool size). Escrow CRDTs provide a form of distributed mutual exclusion without consensus, but with a caveat: they guarantee safety (no over-allocation) only when the network delivers messages reliably and in order.
 
-**Analysis**: Escrow CRDTs are an interesting theoretical option for P-MCP's lease management. However, they are not widely implemented, do not have the same battle-tested production pedigree as Raft, and still face the convergence latency and split-brain issues described above. They should be considered for future research but not relied upon for the initial P-MCP implementation.
+**Analysis**: Escrow CRDTs are an interesting theoretical option for PCP's lease management. However, they are not widely implemented, do not have the same battle-tested production pedigree as Raft, and still face the convergence latency and split-brain issues described above. They should be considered for future research but not relied upon for the initial PCP implementation.
 
 ### Known Failures and Cautionary Guidance
 
@@ -881,7 +881,7 @@ Given the fundamental incompatibility of pure CRDTs with safety-critical mutual 
 
 3. **Academic cautions**: Several papers have noted that CRDTs' convergence guarantees come at the cost of weaker consistency semantics. Kleppmann and Beresford (2017) noted that CRDT-based systems can violate application-level invariants during the convergence period.
 
-### Recommendations Specifically for P-MCP
+### Recommendations Specifically for PCP
 
 1. **Do NOT use CRDTs for safety-critical state**: Lease management, actuation permissions, and any state that gates physical motion must be managed by a consensus protocol (Raft) that provides strong consistency and linearizability.
 
@@ -911,7 +911,7 @@ Given the fundamental incompatibility of pure CRDTs with safety-critical mutual 
 
 ### Executive Summary
 
-Formal specification methods provide mathematically rigorous descriptions of system behavior that can be verified by automated tools. For a safety-critical protocol like P-MCP, formal specification is not a luxury -- it is a necessity. Industrial safety standards (IEC 61508) recommend or require formal methods for higher SIL levels, and the complexity of distributed coordination protocols makes informal reasoning about correctness unreliable. This section evaluates the available formal methods (TLA+, Alloy, Petri Nets, Statecharts, Event-B, and others) and recommends a combination of TLA+ for protocol-level verification and state machine diagrams for human-readable specification.
+Formal specification methods provide mathematically rigorous descriptions of system behavior that can be verified by automated tools. For a safety-critical protocol like PCP, formal specification is not a luxury -- it is a necessity. Industrial safety standards (IEC 61508) recommend or require formal methods for higher SIL levels, and the complexity of distributed coordination protocols makes informal reasoning about correctness unreliable. This section evaluates the available formal methods (TLA+, Alloy, Petri Nets, Statecharts, Event-B, and others) and recommends a combination of TLA+ for protocol-level verification and state machine diagrams for human-readable specification.
 
 ### TLA+
 
@@ -923,9 +923,9 @@ Formal specification methods provide mathematically rigorous descriptions of sys
 
 **Fact**: PlusCal is an algorithmic language that translates to TLA+. PlusCal provides a more familiar pseudocode-like syntax while retaining the full power of TLA+ for model checking. It is particularly useful for specifying protocol state machines.
 
-#### Strengths for P-MCP
+#### Strengths for PCP
 
-- **Concurrency modeling**: TLA+ naturally models concurrent processes, interleaving, and timing properties. This is essential for verifying P-MCP's distributed coordination.
+- **Concurrency modeling**: TLA+ naturally models concurrent processes, interleaving, and timing properties. This is essential for verifying PCP's distributed coordination.
 - **Model checking**: The TLC model checker can exhaustively explore all possible interleavings for small model sizes. This can find subtle race conditions and timing-dependent bugs.
 - **Temporal logic properties**: TLA+ can express both safety properties ("bad things never happen") and liveness properties ("good things eventually happen").
 - **Proven in production**: Amazon's extensive use of TLA+ for distributed systems provides confidence in the tooling and methodology.
@@ -940,7 +940,7 @@ Formal specification methods provide mathematically rigorous descriptions of sys
 
 **Fact**: Alloy is a formal specification language based on relational logic. It is designed for analyzing structural properties of software systems. The Alloy Analyzer performs bounded verification by exploring all possible instances within a specified scope.
 
-**Analysis**: Alloy is well-suited for analyzing P-MCP's data model and schema constraints (e.g., "every lease has exactly one holder," "no resource can have two active leases"). However, Alloy is less suited for specifying temporal behavior (state transitions over time) compared to TLA+. Alloy is recommended as a complementary tool for schema-level verification.
+**Analysis**: Alloy is well-suited for analyzing PCP's data model and schema constraints (e.g., "every lease has exactly one holder," "no resource can have two active leases"). However, Alloy is less suited for specifying temporal behavior (state transitions over time) compared to TLA+. Alloy is recommended as a complementary tool for schema-level verification.
 
 ### Petri Nets
 
@@ -948,7 +948,7 @@ Formal specification methods provide mathematically rigorous descriptions of sys
 
 **Fact**: Petri nets are widely used in manufacturing automation and process control for modeling workflow and verifying safety properties. Tools like CPN Tools and TINA provide simulation and analysis capabilities.
 
-**Analysis**: Petri nets are a natural fit for modeling P-MCP's state machine (lease states, robot states, protocol phases). They are particularly good at modeling concurrent activities (multiple robots operating simultaneously) and resource contention (competing lease requests). However, Petri nets become unwieldy for complex protocol logic with many message types and conditional transitions.
+**Analysis**: Petri nets are a natural fit for modeling PCP's state machine (lease states, robot states, protocol phases). They are particularly good at modeling concurrent activities (multiple robots operating simultaneously) and resource contention (competing lease requests). However, Petri nets become unwieldy for complex protocol logic with many message types and conditional transitions.
 
 ### Statecharts and UML State Machines
 
@@ -956,13 +956,13 @@ Formal specification methods provide mathematically rigorous descriptions of sys
 
 **Fact**: SCXML (State Chart XML, W3C Recommendation) is an XML-based representation of state machines that can be executed by SCXML interpreters. SCXML is used in voice applications (VoiceXML), dialog management, and embedded systems.
 
-**Analysis**: Statecharts are the most human-readable formal method for specifying protocol state machines. They are well-suited for documenting P-MCP's protocol lifecycle, robot state machines, and lease state transitions. SCXML can serve as an executable specification that implementations can directly use or translate to their target language.
+**Analysis**: Statecharts are the most human-readable formal method for specifying protocol state machines. They are well-suited for documenting PCP's protocol lifecycle, robot state machines, and lease state transitions. SCXML can serve as an executable specification that implementations can directly use or translate to their target language.
 
 ### Event-B
 
 **Fact**: Event-B is a formal method for system-level modeling and analysis. It uses refinement to incrementally develop a system from an abstract specification to a concrete implementation. Event-B is supported by the Rodin platform, which provides automated proof and model checking.
 
-**Analysis**: Event-B's refinement approach is well-suited for developing P-MCP incrementally: start with an abstract safety property, refine it to a more concrete protocol, and prove that each refinement preserves the safety property. However, Event-B has a steep learning curve and limited tooling compared to TLA+.
+**Analysis**: Event-B's refinement approach is well-suited for developing PCP incrementally: start with an abstract safety property, refine it to a more concrete protocol, and prove that each refinement preserves the safety property. However, Event-B has a steep learning curve and limited tooling compared to TLA+.
 
 ### Comparison of Formal Methods
 
@@ -975,9 +975,9 @@ Formal specification methods provide mathematically rigorous descriptions of sys
 | Statecharts/SCXML | State machines, lifecycle | Excellent | Good (SCXML exec) | Excellent | Excellent | High | Low |
 | Event-B | Refinement-based development | Low | Excellent (Rodin) | Limited | Good | Low | Steep |
 
-### Recommended Approach for P-MCP
+### Recommended Approach for PCP
 
-The recommended formal specification approach for P-MCP uses a layered strategy:
+The recommended formal specification approach for PCP uses a layered strategy:
 
 1. **TLA+ for protocol invariants and properties**: Specify the core protocol invariants (mutual exclusion, safe-state reachability, lease validity) and verify them using the TLC model checker. This provides the highest level of assurance for safety-critical properties.
 
@@ -987,7 +987,7 @@ The recommended formal specification approach for P-MCP uses a layered strategy:
 
 ### Specifying Protocol Invariants in TLA+
 
-P-MCP should specify the following invariants in TLA+:
+PCP should specify the following invariants in TLA+:
 
 ```
 INVARIANT MutualExclusion:
@@ -1074,17 +1074,17 @@ PROPERTY EmergencyStopProcessed:
 
 Across all six research domains, several architectural patterns recur consistently in well-designed safety-critical systems:
 
-1. **Defense in depth**: No single mechanism is trusted to ensure safety. Multiple independent layers (hardware interlocks, software safety checks, communication watchdogs, physical safeguards) provide redundant protection. P-MCP should adopt this philosophy: TEE attestation provides hardware-rooted identity, but the protocol must also include software-level validation, heartbeat monitoring, and the ability to integrate with hardware safety systems.
+1. **Defense in depth**: No single mechanism is trusted to ensure safety. Multiple independent layers (hardware interlocks, software safety checks, communication watchdogs, physical safeguards) provide redundant protection. PCP should adopt this philosophy: TEE attestation provides hardware-rooted identity, but the protocol must also include software-level validation, heartbeat monitoring, and the ability to integrate with hardware safety systems.
 
-2. **Fail-safe defaults**: When in doubt, stop. Every safety-critical protocol analyzed in this report defaults to a safe state upon detecting any anomaly. P-MCP's lease timeout provides a form of fail-safe, but it is insufficient alone. The protocol must define what "safe state" means for each robot type and ensure that reaching the safe state does not depend on any single component.
+2. **Fail-safe defaults**: When in doubt, stop. Every safety-critical protocol analyzed in this report defaults to a safe state upon detecting any anomaly. PCP's lease timeout provides a form of fail-safe, but it is insufficient alone. The protocol must define what "safe state" means for each robot type and ensure that reaching the safe state does not depend on any single component.
 
-3. **Formal separation of safety and standard channels**: IEC 61508 and all analyzed safety protocols (OPC-UA Safety, PROFIsafe, EtherCAT Safety) emphasize the separation of safety-related communication from standard communication. P-MCP currently conflates both in a single JSON-RPC channel. This should be rethought.
+3. **Formal separation of safety and standard channels**: IEC 61508 and all analyzed safety protocols (OPC-UA Safety, PROFIsafe, EtherCAT Safety) emphasize the separation of safety-related communication from standard communication. PCP currently conflates both in a single JSON-RPC channel. This should be rethought.
 
-4. **Deterministic timing as a first-class requirement**: Every safety-certified protocol specifies maximum response times, watchdog intervals, and safe-state transition times. P-MCP must make timing a first-class aspect of the protocol specification.
+4. **Deterministic timing as a first-class requirement**: Every safety-certified protocol specifies maximum response times, watchdog intervals, and safe-state transition times. PCP must make timing a first-class aspect of the protocol specification.
 
 ### Common Anti-Patterns
 
-1. **Assuming the network is reliable**: Every safety protocol analyzed in this report assumes the network WILL fail and designs mechanisms to detect and recover from failures. P-MCP's CRDT-based approach handles network partitions through eventual consistency, but this is inappropriate for safety-critical state.
+1. **Assuming the network is reliable**: Every safety protocol analyzed in this report assumes the network WILL fail and designs mechanisms to detect and recover from failures. PCP's CRDT-based approach handles network partitions through eventual consistency, but this is inappropriate for safety-critical state.
 
 2. **Single point of failure in the safety path**: If the lease manager, physics validator, or any other single component fails, the entire safety chain fails. Safety-critical systems use redundancy (dual-channel, triple-modular-redundancy) to eliminate single points of failure.
 
@@ -1120,19 +1120,19 @@ Achieving safety certification (SIL rating) for a protocol that includes machine
 
 2. **Verification**: Safety-certified systems require extensive verification (testing, analysis, formal methods). Machine learning components require specialized verification approaches (formal verification of neural network properties, robustness testing, coverage metrics).
 
-3. **Configuration**: Safety certification typically requires a fixed, validated configuration. P-MCP's support for dynamic capability negotiation and runtime configuration may conflict with certification requirements.
+3. **Configuration**: Safety certification typically requires a fixed, validated configuration. PCP's support for dynamic capability negotiation and runtime configuration may conflict with certification requirements.
 
-4. **Legacy compatibility**: If P-MCP is to be used in existing certified robot systems, the protocol must be compatible with the existing safety-certified communication channels.
+4. **Legacy compatibility**: If PCP is to be used in existing certified robot systems, the protocol must be compatible with the existing safety-certified communication channels.
 
 ### Interoperability Concerns
 
-1. **With ROS 2**: P-MCP should define a ROS 2 RMW adapter or DDS bridge to enable integration with ROS 2-based robots. This requires mapping P-MCP's lease and actuation model to ROS 2's action and service paradigms.
+1. **With ROS 2**: PCP should define a ROS 2 RMW adapter or DDS bridge to enable integration with ROS 2-based robots. This requires mapping PCP's lease and actuation model to ROS 2's action and service paradigms.
 
-2. **With industrial fieldbus**: For integration with existing industrial robots (which typically use EtherCAT, PROFINET, or similar), P-MCP should define a gateway protocol that maps P-MCP's safety messages to fieldbus safety protocols.
+2. **With industrial fieldbus**: For integration with existing industrial robots (which typically use EtherCAT, PROFINET, or similar), PCP should define a gateway protocol that maps PCP's safety messages to fieldbus safety protocols.
 
-3. **With OPC-UA**: OPC-UA is the dominant protocol for industrial IoT. P-MCP should define an OPC-UA companion specification that maps P-MCP's concepts to OPC-UA information models.
+3. **With OPC-UA**: OPC-UA is the dominant protocol for industrial IoT. PCP should define an OPC-UA companion specification that maps PCP's concepts to OPC-UA information models.
 
-### Places Where P-MCP Currently Appears to Violate Best Practices
+### Places Where PCP Currently Appears to Violate Best Practices
 
 1. **CRDTs for safety-critical state (lease management)**: Violates the strong consistency requirement for mutual exclusion. No existing safety-certified protocol uses CRDTs for safety state.
 
@@ -1162,7 +1162,7 @@ Achieving safety certification (SIL rating) for a protocol that includes machine
 
 ### Deliverable 3: Architecture Comparison Tables
 
-| Dimension | P-MCP (Current) | MCP (Anthropic) | ROS 2/DDS | MAVLink | OPC-UA Safety |
+| Dimension | PCP (Current) | MCP (Anthropic) | ROS 2/DDS | MAVLink | OPC-UA Safety |
 |-----------|-----------------|-----------------|-----------|---------|---------------|
 | Domain | Physical robotics | LLM tool invocation | General robotics | Drones/UAV | Industrial automation |
 | Primary Goal | Safe coordination | Tool/data access | Middleware communication | Vehicle control | Safety-certified control |
@@ -1200,9 +1200,9 @@ Achieving safety certification (SIL rating) for a protocol that includes machine
 | No formal specification | High | N/A (process gap) | N/A | Undetected design errors | TLA+ specification with model checking |
 | Protocol evolution breaks compatibility | Medium | Low | Low | Deployed systems stop working | Semantic versioning with CI/CD compatibility checks |
 
-### Deliverable 7: Recommended Protocol Architecture for P-MCP
+### Deliverable 7: Recommended Protocol Architecture for PCP
 
-Based on the research in this report, the recommended P-MCP protocol architecture is:
+Based on the research in this report, the recommended PCP protocol architecture is:
 
 ```
 +---------------------------------------------------------------+
@@ -1472,7 +1472,7 @@ ppcp-spec/
 
 11. **SemVer 2.0.0** -- Semantic Versioning specification. Defines version numbering scheme and compatibility rules. Available at semver.org.
 
-12. **JSON-RPC 2.0** -- JSON-RPC 2.0 Specification. Defines the JSON-RPC request/response protocol used by MCP and proposed for P-MCP. Available at jsonrpc.org.
+12. **JSON-RPC 2.0** -- JSON-RPC 2.0 Specification. Defines the JSON-RPC request/response protocol used by MCP and proposed for PCP. Available at jsonrpc.org.
 
 #### Specifications and RFCs
 
@@ -1492,7 +1492,7 @@ ppcp-spec/
 
 19. **Almeida, P.S., Shoker, A., and Baquero, C. (2018).** "Delta State Replicated Data Types." Journal of Parallel and Distributed Computing, 111, 162-173. Introduces delta-state CRDTs that reduce bandwidth overhead. [Available from ScienceDirect]
 
-20. **Ongaro, D. and Ousterhout, J. (2014).** "In Search of an Understandable Consensus Algorithm." USENIX ATC 2014. The Raft consensus protocol paper. Essential reading for understanding the consensus alternative to CRDTs for P-MCP's lease management. [Available from usenix.org]
+20. **Ongaro, D. and Ousterhout, J. (2014).** "In Search of an Understandable Consensus Algorithm." USENIX ATC 2014. The Raft consensus protocol paper. Essential reading for understanding the consensus alternative to CRDTs for PCP's lease management. [Available from usenix.org]
 
 21. **Kleppmann, M. and Beresford, A.R. (2017).** "A Conflict-Free Replicated JSON Datatype." IEEE Transactions on Parallel and Distributed Systems, 28(10), 2733-2746. Demonstrates CRDT application to structured data but highlights the challenges of maintaining application-level invariants. [Available from IEEE Xplore]
 
@@ -1504,7 +1504,7 @@ ppcp-spec/
 
 25. **Harel, D. (1987).** "Statecharts: A Visual Formalism for Complex Systems." Science of Computer Programming, 8(3), 231-274. The foundational paper on Statecharts, the basis for UML state machines and SCXML. [Available from ScienceDirect]
 
-26. **Howard, H., Malkhi, D., and Spiegelman, A. (2020).** "Flexible Paxos: Quorum Intersection Revisited." OSDI 2020. Generalizes Paxos/Raft quorum requirements. Relevant for understanding P-MCP's consensus options. [Available from usenix.org]
+26. **Howard, H., Malkhi, D., and Spiegelman, A. (2020).** "Flexible Paxos: Quorum Intersection Revisited." OSDI 2020. Generalizes Paxos/Raft quorum requirements. Relevant for understanding PCP's consensus options. [Available from usenix.org]
 
 #### GitHub Repositories and Open-Source Implementations
 
@@ -1512,7 +1512,7 @@ ppcp-spec/
 
 28. **etcd** -- github.com/etcd-io/etcd. Production Raft consensus implementation in Go. The most widely-deployed Raft implementation, used in Kubernetes. [Apache 2.0 License]
 
-29. **HashiCorp Raft** -- github.com/hashicorp/raft. Production Raft implementation in Go, used in Consul and Vault. Well-documented and suitable as a reference for P-MCP's consensus layer. [MPL 2.0 License]
+29. **HashiCorp Raft** -- github.com/hashicorp/raft. Production Raft implementation in Go, used in Consul and Vault. Well-documented and suitable as a reference for PCP's consensus layer. [MPL 2.0 License]
 
 30. **MAVLink C Library** -- github.com/mavlink/c_library_v2. Reference implementation of the MAVLink protocol. Includes message definitions and parsing/generation code. [LGPL v3]
 

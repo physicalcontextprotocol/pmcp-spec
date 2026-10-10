@@ -1,11 +1,11 @@
-# Changelog — pmcp-spec
+# Changelog — pcp-spec
 
-All notable changes to the Physical Model Context Protocol
+All notable changes to the Physical Context Protocol
 specification. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 Implementation changes belong in the SDK's own changelog
-(`pmcp-python`, `pmcp-typescript`, `pmcp-rust`).
+(`pcp-python`, `pcp-typescript`, `pcp-rust`).
 
 ## [0.6.0] — 2026-09-28
 
@@ -22,7 +22,7 @@ the artifact this repository ships and the thing a reader pins.
 An earlier draft of this file headed the entry `## [1.0.0]`. That was
 wrong twice over: it claimed a spec release that does not exist, and it
 contradicted this repository's own README badge, which has said
-P-MCP v0.5 throughout. The SDKs are at 1.0.0. The specification is not.
+PCP v0.5 throughout. The SDKs are at 1.0.0. The specification is not.
 
 ### Added
 
@@ -77,4 +77,4 @@ lease/mutex coordination model were established here.
 ## [0.1.0] – [0.4.0]
 
 Development history, preserved as snapshots in the private
-`pmcp-labs/legacy/` repository.
+`pcp-labs/legacy/` repository.

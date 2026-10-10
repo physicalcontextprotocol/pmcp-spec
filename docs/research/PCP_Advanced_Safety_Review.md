@@ -1,4 +1,4 @@
-# P-MCP Advanced Safety-Critical Design Review
+# PCP Advanced Safety-Critical Design Review
 
 **Evidence-Based Research Report for Canonical Specification**
 
@@ -6,7 +6,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Title** | P-MCP Advanced Safety-Critical Design Review |
+| **Title** | PCP Advanced Safety-Critical Design Review |
 | **Version** | 1.0 |
 | **Date** | August 2026 |
 | **Classification** | Protocol Architecture Decision Support |
@@ -34,11 +34,11 @@
 
 ## Executive Summary
 
-This report provides evidence-based analysis of seven open design questions for P-MCP, a safety-critical robotics coordination protocol. Each question was evaluated against the current state of the art in its respective domain, drawing on official standards, peer-reviewed literature, regulatory guidance, and production system documentation.
+This report provides evidence-based analysis of seven open design questions for PCP, a safety-critical robotics coordination protocol. Each question was evaluated against the current state of the art in its respective domain, drawing on official standards, peer-reviewed literature, regulatory guidance, and production system documentation.
 
 **Key findings across all seven questions:**
 
-- **Q1 (Neural Determinism)**: Conformal prediction provides a mathematically grounded framework for uncertainty quantification. Cross-hardware non-determinism remains an open problem with no certifiable solution. P-MCP should adopt adaptive conformal prediction for confidence intervals and document a hardware qualification regime with tolerance budgets.
+- **Q1 (Neural Determinism)**: Conformal prediction provides a mathematically grounded framework for uncertainty quantification. Cross-hardware non-determinism remains an open problem with no certifiable solution. PCP should adopt adaptive conformal prediction for confidence intervals and document a hardware qualification regime with tolerance budgets.
 
 - **Q2 (Consensus Failure)**: Watchdog-governed autonomous safe-state transition is established engineering practice (Siemens S7-1500F, Airbus triplex flight control). The interaction between Raft lease invalidation and multi-robot physical safety has no published precedent and must be documented as a novel safety argument.
 
@@ -48,11 +48,11 @@ This report provides evidence-based analysis of seven open design questions for 
 
 - **Q5 (Signed JSON-RPC)**: JWS (RFC 7515) over JSON-RPC payloads with Ed25519 is a solved composition. Batch signing via Merkle trees addresses high-frequency message overhead. This is established engineering practice with extensive tooling.
 
-- **Q6 (Recovery After Safe State)**: ISO 10218 and IEC 61508 clearly mandate a multi-phase recovery sequence with deliberate human action at each stage. This is a solved problem with clear standards requirements, though the mapping to P-MCP-specific protocol messages is novel.
+- **Q6 (Recovery After Safe State)**: ISO 10218 and IEC 61508 clearly mandate a multi-phase recovery sequence with deliberate human action at each stage. This is a solved problem with clear standards requirements, though the mapping to PCP-specific protocol messages is novel.
 
-- **Q7 (SIL for ML)**: No ML component has achieved SIL 3 or higher under IEC 61508. The current practical ceiling is SIL 1/SIL 2 with significant evidence requirements. EASA and FAA guidance documents acknowledge the gap without resolving it. P-MCP should target SIL 2 for the Shadow Validation gate with a monitor-controller (Simplex) architecture.
+- **Q7 (SIL for ML)**: No ML component has achieved SIL 3 or higher under IEC 61508. The current practical ceiling is SIL 1/SIL 2 with significant evidence requirements. EASA and FAA guidance documents acknowledge the gap without resolving it. PCP should target SIL 2 for the Shadow Validation gate with a monitor-controller (Simplex) architecture.
 
-**Overall assessment**: Of the 21 sub-questions across the seven questions, 12 are solved engineering practice, 5 are partially solved with implementation complexity, and 4 are genuine open research problems requiring P-MCP to document its own judgment calls.
+**Overall assessment**: Of the 21 sub-questions across the seven questions, 12 are solved engineering practice, 5 are partially solved with implementation complexity, and 4 are genuine open research problems requiring PCP to document its own judgment calls.
 
 ---
 
@@ -78,7 +78,7 @@ Conformal prediction wraps any predictor with a statistically valid prediction i
 3. Compute quantile: q = quantile(s, ceil((1-alpha)(N+1))/N).
 4. Prediction interval for new input x: [f_hat(x) - q, f_hat(x) + q].
 
-**Adaptive conformal inference** (Gibbs and Candes, 2021) extends this to handle distribution shift by maintaining a running score that widens intervals when recent coverage has been poor. For P-MCP, where payload, temperature, and joint wear drift over time, adaptive conformal is strongly recommended.
+**Adaptive conformal inference** (Gibbs and Candes, 2021) extends this to handle distribution shift by maintaining a running score that widens intervals when recent coverage has been poor. For PCP, where payload, temperature, and joint wear drift over time, adaptive conformal is strongly recommended.
 
 **Ensemble Disagreement (Recommended Secondary Signal)**
 
@@ -86,7 +86,7 @@ Train K models with different initializations or architectures. Define disagreem
 
 **Out-of-Distribution (OOD) Detection (Recommended Tertiary Signal)**
 
-The energy-based OOD score (Liu et al., 2020) measures whether an input is far from the training distribution. For P-MCP, OOD detection should flag when the Shadow Validation input (desired trajectory + environment state) is outside the distribution the HNN was trained on. The concrete metric:
+The energy-based OOD score (Liu et al., 2020) measures whether an input is far from the training distribution. For PCP, OOD detection should flag when the Shadow Validation input (desired trajectory + environment state) is outside the distribution the HNN was trained on. The concrete metric:
 
 ```
 E(f(x)) = -T * log(sum(exp(f(x)_i / T)))
@@ -95,7 +95,7 @@ OOD_score(x) = E(f(x)) - E_threshold
 
 where T is a temperature parameter and E_threshold is calibrated on a validation set.
 
-### 1.3 Recommended P-MCP Shadow Validation Response Schema
+### 1.3 Recommended PCP Shadow Validation Response Schema
 
 ```json
 {
@@ -186,7 +186,7 @@ where T is a temperature parameter and E_threshold is calibrated on a validation
 
 3. **FDA SaMD guidance (2024)**: Requires documented performance bounds on the **specific hardware configuration**. Re-validation is required when hardware changes. Does not mandate cross-hardware determinism.
 
-**Recommended approach for P-MCP**:
+**Recommended approach for PCP**:
 
 1. **Determinism hash**: Hash of input + model version + hardware fingerprint in every Shadow response. Enables post-hoc replay on identical hardware.
 2. **Tolerance budget delta_max**: Maximum permissible cross-hardware output deviation, measured during qualification on all supported platforms. Added to the conformal interval: total_interval = conformal_interval + delta_max.
@@ -200,7 +200,7 @@ where T is a temperature parameter and E_threshold is calibrated on a validation
 
 **Security implications**: An attacker who can manipulate the conformal calibration data could widen all confidence intervals, causing the system to reject valid commands (denial of service). The calibration dataset and threshold must be integrity-protected (signed and stored in TEE-protected memory).
 
-**Safety implications**: The `INDETERMINATE` verdict is a safe failure mode -- the robot does not actuate, which is the correct behavior when confidence is insufficient. However, frequent `INDETERMINATE` verdicts reduce availability, which may cause operators to increase thresholds dangerously. P-MCP should log all `INDETERMINATE` verdicts and alert the operator if the rate exceeds a configured threshold.
+**Safety implications**: The `INDETERMINATE` verdict is a safe failure mode -- the robot does not actuate, which is the correct behavior when confidence is insufficient. However, frequent `INDETERMINATE` verdicts reduce availability, which may cause operators to increase thresholds dangerously. PCP should log all `INDETERMINATE` verdicts and alert the operator if the rate exceeds a configured threshold.
 
 ### 1.6 Implementation Complexity
 
@@ -218,7 +218,7 @@ where T is a temperature parameter and E_threshold is calibrated on a validation
 | Confidence quantification | **SOLVED** | Established practice: conformal prediction intervals |
 | Uncertainty quantification | **SOLVED** | Established practice: adaptive conformal + ensemble disagreement |
 | Threshold calibration | **SOLVED** | Established practice: conformal quantile from calibration data |
-| Cross-hardware non-determinism | **OPEN** | No certifiable solution; P-MCP must document its own approach |
+| Cross-hardware non-determinism | **OPEN** | No certifiable solution; PCP must document its own approach |
 | Certification path for ML-gated actuation | **OPEN** | See Question 7 |
 
 ### 1.8 Primary References (Must Read)
@@ -286,7 +286,7 @@ In safety-critical distributed systems, consensus failure is treated as a safety
 
 ### 3.1 Current State of the Art
 
-TEE attestation proves code integrity, not physical location. For P-MCP, a robot claiming to be in Workspace A when physically in Workspace B could cause a collision if workspace reservations are spatial. The most mature commercially available technology for proving physical presence is IEEE 802.15.4z UWB secure ranging.
+TEE attestation proves code integrity, not physical location. For PCP, a robot claiming to be in Workspace A when physically in Workspace B could cause a collision if workspace reservations are spatial. The most mature commercially available technology for proving physical presence is IEEE 802.15.4z UWB secure ranging.
 
 **Industry consensus**: UWB distance-bounding is the strongest commercially available location assurance for IoT/robotics. BLE RSSI is unsuitable for safety-critical use due to documented spoofing attacks. Visual fiducials are useful for initialization but too fragile for continuous safety.
 
@@ -403,7 +403,7 @@ Nav2's multi-robot coordination uses a list of timed poses for each robot's plan
 
 | Approach | Spatial Flexibility | Conflict Check Complexity | Scalability | Use Case |
 |----------|-------------------|-------------------------|------------|----------|
-| R-tree + time intervals | High (any shape) | O(log N) avg | High | General P-MCP |
+| R-tree + time intervals | High (any shape) | O(log N) avg | High | General PCP |
 | Occupancy grid | Low (axis-aligned cells) | O(1) per cell | Very high | Structured warehouses |
 | Nav2 trajectory list | Medium (footprint per step) | O(T^2) | Low | Small ROS 2 fleets |
 | Conflict-Based Search | Medium (discrete graph) | Polynomial | Medium | Path planning integration |
@@ -493,7 +493,7 @@ ISO 10218-1 Clause 5.5.3 mandates: (a) E-stop device must be manually reset, (b)
 
 ### 6.2 Recommended Five-Phase Recovery Handshake
 
-**Phase 1: Physical Reset.** E-stop device manually cleared. Verified by robot's local safety controller (hardware inputs, not P-MCP messages).
+**Phase 1: Physical Reset.** E-stop device manually cleared. Verified by robot's local safety controller (hardware inputs, not PCP messages).
 
 **Phase 2: Identity Re-verification.** TEE attestation refreshed. Ed25519 challenge-response to prove key possession. Ensures the robot has not been tampered with during safe state.
 
@@ -509,7 +509,7 @@ ISO 10218-1 Clause 5.5.3 mandates: (a) E-stop device must be manually reset, (b)
 }
 ```
 
-**Phase 3: Operator Confirmation.** Human operator explicitly confirms recovery via a signed P-MCP message. The operator's identity is verified via the same TEE+Ed25519 chain. This is mandated by ISO 10218-1 and cannot be bypassed.
+**Phase 3: Operator Confirmation.** Human operator explicitly confirms recovery via a signed PCP message. The operator's identity is verified via the same TEE+Ed25519 chain. This is mandated by ISO 10218-1 and cannot be bypassed.
 
 **Phase 4: Self-Test.** Robot executes a self-test sequence: joint encoders, brake engagement verification, force/torque sensor zero-offset check, end-effector status. Results reported to the fleet coordinator.
 
@@ -551,7 +551,7 @@ Any phase failure --> SAFE (restart handshake)
 | Re-attestation requirement | **SOLVED** (recommended) |
 | Operator confirmation | **SOLVED** (mandated by standard) |
 | Self-test requirements | **SOLVED** (IEC 62061) |
-| Full handshake protocol | **PARTIALLY SOLVED** (novel mapping to P-MCP) |
+| Full handshake protocol | **PARTIALLY SOLVED** (novel mapping to PCP) |
 
 ### 6.5 Primary References
 
@@ -589,16 +589,16 @@ No ML component has achieved SIL 3 or higher under IEC 61508. The current practi
 
 ### 7.3 Recommended Architecture: Monitor-Controller (Simplex)
 
-P-MCP should use the Simplex architecture: a verified, simple safety monitor oversees the complex ML-based controller. The monitor can be certified to a higher SIL than the ML component.
+PCP should use the Simplex architecture: a verified, simple safety monitor oversees the complex ML-based controller. The monitor can be certified to a higher SIL than the ML component.
 
-**P-MCP gate SIL targets**:
+**PCP gate SIL targets**:
 
 | Gate | Mechanism | Recommended SIL | Rationale |
 |------|-----------|-----------------|----------|
 | Lease gate | Raft consensus + Ed25519 auth | **SIL 2** | Deterministic software; standard verification applies |
 | Constitution gate | Rule engine (not ML) | **SIL 3** | Pure logic; highest SIL achievable for software |
 | Shadow Validation gate | HNN + conformal monitor | **SIL 1** | ML component limits overall gate SIL |
-| Overall P-MCP architecture | Composition of gates | **SIL 2** | Limited by the weakest link (Shadow gate) |
+| Overall PCP architecture | Composition of gates | **SIL 2** | Limited by the weakest link (Shadow gate) |
 
 The Shadow Validation gate achieves SIL 1 through the monitor-controller architecture: the conformal prediction interval checker and hard limit checker (both deterministic, verifiable code) form the safety monitor, while the HNN is the complex controller. The monitor can independently trigger `FAIL` or `INDETERMINATE` verdicts regardless of the HNN's output.
 
@@ -628,7 +628,7 @@ The Shadow Validation gate achieves SIL 1 through the monitor-controller archite
 
 ### Deliverable 5: Architecture Comparison Tables
 
-| Dimension | P-MCP | MCP (Anthropic) | ROS 2/DDS | MAVLink | OPC-UA Safety |
+| Dimension | PCP | MCP (Anthropic) | ROS 2/DDS | MAVLink | OPC-UA Safety |
 |-----------|-------|-----------------|-----------|---------|---------------|
 | Domain | Physical robotics | LLM tool invocation | General robotics | Drones | Industrial automation |
 | Wire format | JSON-RPC 2.0 | JSON-RPC 2.0 | CDR (binary) | Binary | OPC-UA binary |
@@ -643,7 +643,7 @@ The Shadow Validation gate achieves SIL 1 through the monitor-controller archite
 
 ### Deliverable 6: Standards Comparison Matrix
 
-| Standard | Scope | Protocol Req | SIL/PL | P-MCP Gap |
+| Standard | Scope | Protocol Req | SIL/PL | PCP Gap |
 |----------|-------|-------------|--------|----------|
 | ISO 10218-1 | Robot safety | Safe state on single fault | Refs IEC 61508 | E-stop mechanism missing |
 | ISO 10218-2 | Robot system | Comm fault behavior | Refs IEC 61508 | Recovery protocol missing |
@@ -655,7 +655,7 @@ The Shadow Validation gate achieves SIL 1 through the monitor-controller archite
 
 ### Deliverable 7: Certification Feasibility Matrix
 
-| P-MCP Component | Technology | Max Achievable SIL | Evidence Required | Certification Body | Feasibility |
+| PCP Component | Technology | Max Achievable SIL | Evidence Required | Certification Body | Feasibility |
 |-----------------|-----------|-------------------|------------------|-----------------|------------|
 | Lease gate | Raft + Ed25519 | SIL 2 | FMEA, fault injection, FT | TUV, DNV | High |
 | Constitution gate | Rule engine | SIL 3 | FMEA, formal verification | TUV, DNV | High |
@@ -696,7 +696,7 @@ The Shadow Validation gate achieves SIL 1 through the monitor-controller archite
 | Q5 | JWS on JSON-RPC | SOLVED | Established practice |
 | Q5 | Batch signing | SOLVED | Merkle trees |
 | Q6 | Recovery sequence | SOLVED | ISO 10218 mandates |
-| Q6 | P-MCP-specific handshake | PARTIALLY SOLVED | Novel mapping |
+| Q6 | PCP-specific handshake | PARTIALLY SOLVED | Novel mapping |
 | Q7 | ML SIL ceiling | OPEN | Practical: SIL 2 with Simplex |
 | Q7 | Simplex architecture | SOLVED | Established pattern |
 
@@ -848,7 +848,7 @@ Defined in-line above for:
 | **JWS** | JSON Web Signature (RFC 7515) |
 | **OOD** | Out-of-Distribution |
 | **OPC-UA** | Open Platform Communications Unified Architecture |
-| **P-MCP** | Physical Model Context Protocol |
+| **PCP** | Physical Context Protocol |
 | **PFD** | Probability of Dangerous Failure on Demand |
 | **PFH** | Probability of Dangerous Failure per Hour |
 | **PL** | Performance Level (ISO 13849) |

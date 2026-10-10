@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Model-check both P-MCP TLA+ specs, then prove the checker is not
+# Model-check both PCP TLA+ specs, then prove the checker is not
 # passing vacuously.
 #
 # The second half matters more than the first. A model checker that

@@ -1,6 +1,6 @@
-# PMCP: Verified State & Open Research Problems
+# PCP: Verified State & Open Research Problems
 
-This document exists so that every claim PMCP makes about itself is
+This document exists so that every claim PCP makes about itself is
 checkable. If something is not listed under "Verified today", treat it
 as not yet proven — that is deliberate, not an oversight.
 
@@ -18,13 +18,13 @@ validator, or a CI job — not by design intent or code review.
 
 | Component | Command | Result |
 |---|---|---|
-| `pmcp-python` | `pytest -q` on `pip install -e ".[dev,numerics]"`, Python 3.12 | **214 collected, 213 passed, 1 skipped** |
+| `pcp-python` | `pytest -q` on `pip install -e ".[dev,numerics]"`, Python 3.12 | **214 collected, 213 passed, 1 skipped** |
 | the one skip | `pytest -q -rs` | `tests/v05/test_hnn_gate.py:208` — *"torch/numpy available — cannot test missing-deps path"*. It is an `importorskip`-style guard for the absent-dependency branch, and it can only run when torch/numpy are **not** installed. |
-| `pmcp-rust/pmcp-core` | `cargo test` | **43 passed, 0 failed** |
-| `pmcp-conformance` | `pytest -q` | **42 passed** |
-| `pmcp-spec` schema | `python schema/v0.6.0/verify.py` | **5 fixtures, 0 failures** — 2 valid accepted, 3 invalid rejected *for the stated reason* |
-| `pmcp-typescript` | `npx tsc --noEmit` (typescript installed locally) | **32 compile errors** across 7 files. No test suite exists. |
-| `pmcp-rust/pmcp-ledger` | `cargo build` | **19 compile errors** (cargo's own summary: *19 previous errors; 45 warnings*). Not runnable. |
+| `pcp-rust/pcp-core` | `cargo test` | **43 passed, 0 failed** |
+| `pcp-conformance` | `pytest -q` | **42 passed** |
+| `pcp-spec` schema | `python schema/v0.6.0/verify.py` | **5 fixtures, 0 failures** — 2 valid accepted, 3 invalid rejected *for the stated reason* |
+| `pcp-typescript` | `npx tsc --noEmit` (typescript installed locally) | **32 compile errors** across 7 files. No test suite exists. |
+| `pcp-rust/pcp-ledger` | `cargo build` | **19 compile errors** (cargo's own summary: *19 previous errors; 45 warnings*). Not runnable. |
 
 **A note on how to check the TypeScript number, because it bites.** With
 no local `node_modules`, `npx tsc --noEmit` prints a decoy banner
@@ -32,7 +32,7 @@ no local `node_modules`, `npx tsc --noEmit` prints a decoy banner
 Grepping its output for `error TS` returns zero, which looks exactly
 like a clean build. Install dev dependencies first
 (`npm ci`) or you will "verify" a compile failure into a compile pass.
-`pmcp-typescript`'s CI installs before type-checking, so the job itself
+`pcp-typescript`'s CI installs before type-checking, so the job itself
 is sound — but the local one-liner is a trap, and it is how the previous
 "19 errors" figure went stale in the first place.
 
@@ -58,7 +58,7 @@ a claim, and a claim still has to survive a re-run. The error here was
 not dishonesty but the same class of bug this document exists to catch —
 trusting a number because it was written down, in either direction.
 
-`pmcp-python`'s collected total has changed across drafts (187, then
+`pcp-python`'s collected total has changed across drafts (187, then
 214), so the count is now stated as collected **and** passed **and**
 skipped, and the command to reproduce it, in every place it appears.
 
@@ -96,10 +96,10 @@ skipped, and the command to reproduce it, in every place it appears.
   in the actuation-call path itself.
 - **Four more defects were found during release assembly**, by running
   the CI definitions locally rather than trusting them:
-  - `pmcp-conformance`'s `pip install -e .` failed outright — setuptools
+  - `pcp-conformance`'s `pip install -e .` failed outright — setuptools
     flat-layout discovery aborts on a repository that is a test suite
     with no importable package. CI would have been red on arrival.
-  - `pmcp-rust/pmcp-ledger` requested the redis feature `scripting`,
+  - `pcp-rust/pcp-ledger` requested the redis feature `scripting`,
     which does not exist in redis 0.25 (it is `script`), so Cargo
     could not resolve the dependency at all.
   - The `EStopMessage` "valid" schema example carried an ISO-8601
@@ -137,11 +137,11 @@ Stated explicitly so nothing here is over-read:
   Reproduce with `./formal/check.sh`, which fetches a checksum-verified
   tla2tools, runs all four models, and exits non-zero if TLC ever
   accepts a mutant.
-- **`pmcp-typescript` has no test suite and does not compile.** Any
+- **`pcp-typescript` has no test suite and does not compile.** Any
   "three peer SDKs" claim is currently a claim about two SDKs plus a
   skeleton. The TypeScript build being non-blocking in CI is a declared
   failure, not a passing check.
-- **`pmcp-rust/pmcp-ledger` does not compile.** Its CI job is
+- **`pcp-rust/pcp-ledger` does not compile.** Its CI job is
   non-blocking, which means nothing about it has been verified.
 - **CI has not yet run on GitHub.** The figures in the table are from
   local runs on the release machine. The Actions runs are the next step,
@@ -176,12 +176,12 @@ safety without saying what is still open is not one you should trust.
 These are ordinary unfinished work, listed so nobody mistakes them for
 solved:
 
-- `pmcp-python` ships at least **four** client implementations side by
+- `pcp-python` ships at least **four** client implementations side by
   side (`pmcp/client.py`, `pmcp/client_v2.py`, `sdk/client.py`,
   `v05/pmcp_v5_client.py`) and three parallel server packages. Picking a
   canonical one is the highest-value open contribution in that repo.
-- **`pmcp/` in `pmcp-python` has no tests at all.** The suite under
-  `pmcp-python/tests/` exercises `v05/` exclusively (80.50% covered, and
+- **`pmcp/` in `pcp-python` has no tests at all.** The suite under
+  `pcp-python/tests/` exercises `v05/` exclusively (80.50% covered, and
   that is the number the 80% CI gate is written against). All 34 modules
   under `pmcp/` are imported by zero tests, so their real coverage is
   **0%**, and they are where the mypy errors concentrate. `v05/` is the
@@ -189,22 +189,22 @@ solved:
   implementation that is carried but unverified. Treat `v05/` as the
   tested surface and `pmcp/` as unproven, and note that the CI coverage
   number covers only the former.
-- `pmcp-typescript` has **two** competing `PMCPServer`
+- `pcp-typescript` has **two** competing `PMCPServer`
   implementations (`src/server.ts` and `src/server_impl.ts`), re-exported
   simultaneously from `src/index.ts`.
-- `pmcp-registry` has no authentication, `CORS *` on `POST`/`DELETE`, no
+- `pcp-registry` has no authentication, `CORS *` on `POST`/`DELETE`, no
   request-body size limit, no host/port allowlist on `register` (an SSRF
   pivot), and directory listing on the static mount. **Do not expose it
   to an untrusted network.**
-- `pmcp-safety`'s TEE attestator returns `MOCK_QUOTE` with hardcoded
+- `pcp-safety`'s TEE attestator returns `MOCK_QUOTE` with hardcoded
   enclave keys, and its safety loop defaults to `--simulator mock`.
   **Neither is a security boundary.**
-- `pmcp-labs/infra/` Dockerfiles and compose files reference pre-split
+- `pcp-labs/infra/` Dockerfiles and compose files reference pre-split
   paths and do not build.
-- Five `pmcp-servers/examples/` files import `pmcp_grand_unified` from
-  the private `pmcp-labs` repository, so they cannot run without access
+- Five `pcp-servers/examples/` files import `pmcp_grand_unified` from
+  the private `pcp-labs` repository, so they cannot run without access
   to it.
-- `pmcp-python` does not type-check. `mypy v05/ pmcp/
+- `pcp-python` does not type-check. `mypy v05/ pmcp/
   --ignore-missing-imports` reports **70 errors** across 17 files, and
   has done so for the life of the CI job. They cluster in
   `pmcp/physics/engine.py` (17), the deprecated `pmcp/client_v2.py` (13)
@@ -215,16 +215,16 @@ solved:
   budget** (fails only above 70), not a type-safety claim, and it is
   named "mypy error budget (baseline 70)" so a green run is not
   mistaken for a clean type check. Clearing it is the second
-  highest-value open contribution in `pmcp-python` after picking a
+  highest-value open contribution in `pcp-python` after picking a
   canonical client.
-- `pmcp-rust/ledger` does not compile (**19 errors**), and
-  `pmcp-typescript` does not compile (**32**). Both are recorded in their
-  own repos; `pmcp-typescript` guards its 32 with a compile-error budget
+- `pcp-rust/ledger` does not compile (**19 errors**), and
+  `pcp-typescript` does not compile (**32**). Both are recorded in their
+  own repos; `pcp-typescript` guards its 32 with a compile-error budget
   so the number cannot silently drift again.
 
 ## What this means in practice
 
-- If you are evaluating PMCP for a system where Shadow validation,
+- If you are evaluating PCP for a system where Shadow validation,
   conformal prediction, or UWB localization is load-bearing for safety,
   **do your own hardware validation of those specific components**
   before relying on them. The lease/mutex coordination, gate ordering,

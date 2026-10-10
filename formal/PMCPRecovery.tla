@@ -1,6 +1,6 @@
 ---- MODULE PMCPRecovery ----
 (***************************************************************************)
-(* P-MCP five-phase recovery handshake after Safe State.                  *)
+(* PCP five-phase recovery handshake after Safe State.                  *)
 (* Models SAFETY_ARCHITECTURE.md sec 10.7.                                *)
 (*                                                                         *)
 (* Key modeling choice: manual reset and operator-start confirmation are  *)
